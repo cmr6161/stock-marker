@@ -8,29 +8,29 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body { font-family: system-ui, -apple-system, sans-serif; background: #12192b; color: #e0e6f0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; touch-action: pan-y; }
-
+ 
 #toolbar { background: #1a2540; padding: 6px 10px; display: flex; flex-wrap: nowrap; gap: 5px; align-items: center; border-bottom: 1px solid #2a3f6a; flex-shrink: 0; font-size: 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
 #toolbar::-webkit-scrollbar { display: none; }
 .tb-sep { width: 1px; min-width: 1px; height: 20px; background: #2a3f6a; margin: 0 2px; }
 .tb-label { color: #8ca0c8; font-size: 11px; white-space: nowrap; }
-
+ 
 #main { display: flex; flex: 1; overflow: hidden; min-height: 0; }
 #charts-col { flex: 1; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 12px; min-width: 0; -webkit-overflow-scrolling: touch; }
 #notes-col { width: 360px; min-width: 0; background: #1a2540; border-left: 1px solid #2a3f6a; display: flex; flex-direction: column; overflow: hidden; padding: 8px; flex-shrink: 0; transition: width .25s ease, padding .25s ease; }
 #notes-col.hidden { width: 0; padding: 0; }
-
+ 
 .chart-panel { background: #1a2540; border: 1px solid #2a3f6a; border-radius: 7px; padding: 6px 8px 5px; }
 .chart-title { font-weight: 700; font-size: 12px; color: #e94560; margin-bottom: 3px; display: flex; align-items: center; gap: 6px; }
 .chart-wrap { width: 100%; touch-action: none; }
 .chart-footer { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-top: 4px; font-size: 11px; }
-
+ 
 /* Marker legend */
 .marker-legend { display: flex; flex-direction: column; gap: 3px; margin-top: 5px; padding: 6px 8px; background: #0d1626; border-radius: 5px; border: 1px solid #1e2f50; }
 .marker-legend:empty { display: none; }
 .legend-chips { display: flex; flex-wrap: wrap; gap: 4px; }
 .marker-chip { display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px; border-radius: 10px; font-size: 10px; border: 1px solid; white-space: nowrap; }
 .pair-row { display: flex; align-items: center; gap: 6px; font-size: 10px; color: #8ca0c8; padding: 3px 0; border-top: 1px solid #1e2f50; flex-wrap: wrap; }
-
+ 
 .section-hd { font-weight: 700; font-size: 11px; color: #e94560; padding: 4px 0 3px; letter-spacing: .04em; text-transform: uppercase; flex-shrink: 0; }
 .tbl-wrap { flex: 1; overflow-y: auto; min-height: 40px; }
 .tbl-wrap-sm { flex: 0 0 150px; overflow-y: auto; }
@@ -39,13 +39,13 @@ thead th { background: #12192b; padding: 4px 3px; text-align: left; border-botto
 td { padding: 3px; border-bottom: 1px solid #1e2f50; white-space: nowrap; }
 tr:hover td { background: #1e2f50; }
 .divider { height: 1px; background: #2a3f6a; margin: 6px 0; flex-shrink: 0; }
-
+ 
 #status { font-size: 11px; padding: 2px 8px; background: #1a2540; border-top: 1px solid #2a3f6a; flex-shrink: 0; display: flex; align-items: center; gap: 6px; min-height: 18px; }
 .status-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 .dot-ok{background:#2da44e;}.dot-err{background:#e94560;}
 .dot-busy{background:#f0a030;animation:pulse .8s infinite;}.dot-idle{background:#3a4f70;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-
+ 
 input[type=text],input[type=password],input[type=number],input[type=date],select,textarea {
   background:#12192b;color:#e0e6f0;border:1px solid #2a3f6a;border-radius:4px;padding:3px 6px;font-size:11px;font-family:inherit;min-width:0;
 }
@@ -57,7 +57,7 @@ button.sm{padding:2px 6px;font-size:10px;}
 button.zoom-btn{padding:1px 7px;font-size:13px;font-weight:700;background:#12192b;min-width:26px;}
 label{font-size:11px;display:flex;align-items:center;gap:3px;cursor:pointer;white-space:nowrap;}
 input[type=checkbox]{cursor:pointer;accent-color:#e94560;width:12px;height:12px;}
-
+ 
 /* Tooltip */
 #hover-tooltip {
   position: fixed; display: none; z-index: 9999;
@@ -68,7 +68,7 @@ input[type=checkbox]{cursor:pointer;accent-color:#e94560;width:12px;height:12px;
 #hover-tooltip .tt-date{font-weight:700;color:#e0e6f0;font-size:13px;margin-bottom:2px;}
 #hover-tooltip .tt-price{color:#4e9af1;font-size:13px;margin-bottom:8px;}
 #hover-tooltip .tt-btns{display:flex;gap:5px;}
-
+ 
 dialog{background:#1a2540;color:#e0e6f0;border:1px solid #e94560;border-radius:9px;padding:18px 20px;width:min(95vw,420px);font-family:inherit;font-size:13px;}
 dialog::backdrop{background:rgba(0,0,0,.7);}
 dialog h3{color:#e94560;margin-bottom:14px;font-size:14px;}
@@ -84,7 +84,7 @@ dialog textarea{resize:vertical;min-height:60px;}
 .db-connected{background:#0d2b1a;color:#2da44e;border:1px solid #2da44e44;}
 .db-disconnected{background:#2b0d0d;color:#e94560;border:1px solid #e9456044;}
 body.measure-on #measure-chk-lbl{color:#e94560;font-weight:700;}
-
+ 
 @media(max-width:768px){
   #notes-col{display:none;}
   #notes-col.mobile-show{display:flex;position:fixed;inset:0;z-index:500;width:100%!important;padding:12px;background:#1a2540;}
@@ -98,7 +98,7 @@ body.measure-on #measure-chk-lbl{color:#e94560;font-weight:700;}
 </style>
 </head>
 <body>
-
+ 
 <div id="toolbar">
   <span class="logo">📈 StockMarker</span>
   <div class="tb-sep"></div>
@@ -145,7 +145,7 @@ body.measure-on #measure-chk-lbl{color:#e94560;font-weight:700;}
   <span class="tb-label">API Key</span>
   <input type="password" id="api-key" style="width:135px" value="G10DKKO18ZML0449">
 </div>
-
+ 
 <div id="main">
   <div id="charts-col"></div>
   <div id="notes-col">
@@ -171,12 +171,12 @@ body.measure-on #measure-chk-lbl{color:#e94560;font-weight:700;}
     <button class="sm" style="margin-top:5px;align-self:flex-start" onclick="exportPredictions()">⬇ CSV</button>
   </div>
 </div>
-
+ 
 <div id="status">
   <div class="status-dot dot-idle" id="db-dot"></div>
   <span id="status-text">Ready.</span>
 </div>
-
+ 
 <div id="hover-tooltip">
   <div class="tt-date" id="tt-date">—</div>
   <div class="tt-price" id="tt-price">—</div>
@@ -185,7 +185,7 @@ body.measure-on #measure-chk-lbl{color:#e94560;font-weight:700;}
     <button class="sm" onclick="hideTooltip()">✕</button>
   </div>
 </div>
-
+ 
 <dialog id="predict-dialog">
   <h3>💡 Price Prediction</h3>
   <div class="form-row"><label>Stock ticker</label><input type="text" id="pd-symbol"></div>
@@ -197,7 +197,7 @@ body.measure-on #measure-chk-lbl{color:#e94560;font-weight:700;}
     <button onclick="skipPrediction()">Skip</button>
   </div>
 </dialog>
-
+ 
 <dialog id="search-dialog">
   <h3>🔍 Symbol Search</h3>
   <div style="display:flex;gap:8px;margin-bottom:10px">
@@ -215,7 +215,7 @@ body.measure-on #measure-chk-lbl{color:#e94560;font-weight:700;}
     <button onclick="document.getElementById('search-dialog').close()">Cancel</button>
   </div>
 </dialog>
-
+ 
 <script>
 'use strict';
 const SECTORS={tech:['AAPL','MSFT','NVDA','GOOGL','META','AMZN','TSM','AVGO','ORCL','CRM','AMD','INTC','QCOM','TXN','MU','ADBE','NOW','SNOW','PLTR','NET'],finance:['JPM','BAC','GS','MS','WFC','V','MA','AXP','C','BLK','SCHW','USB','PNC','TFC','COF','ICE','CME','SPGI','MCO','BX'],healthcare:['UNH','JNJ','LLY','ABBV','MRK','TMO','ABT','DHR','BMY','AMGN','PFE','CVS','CI','HUM','MDT','BSX','SYK','ISRG','VRTX','REGN'],energy:['XOM','CVX','COP','EOG','SLB','MPC','PSX','VLO','OXY','HAL','PXD','DVN','FANG','HES','MRO','APA','BKR','NOV','HP','WHD'],consumer:['TSLA','HD','MCD','NKE','SBUX','TGT','LOW','TJX','COST','WMT','PG','KO','PEP','PM','MO','EL','CL','GIS','K','CPB'],industrials:['CAT','HON','UPS','BA','GE','RTX','LMT','DE','EMR','ETN','ITW','PH','ROK','AME','FDX','CSX','UNP','NSC','WM','RSG'],utilities:['NEE','DUK','SO','D','AEP','EXC','SRE','XEL','ES','WEC','ED','ETR','PPL','FE','AEE','CMS','NI','LNT','EVRG','PNW'],realestate:['AMT','PLD','CCI','EQIX','SPG','PSA','DLR','O','WELL','AVB','EQR','MAA','UDR','CPT','ESS','NLY','AGNC','MPW','VNO','IRM'],materials:['LIN','APD','ECL','SHW','NEM','FCX','NUE','VMC','MLM','DOW','DD','PPG','ALB','MOS','CF','IFF','FMC','SEE','AMCR','PKG'],crypto:['COIN','MSTR','MARA','RIOT','HUT','CLSK','CIFR','BTBT','SQ','PYPL','HOOD','SOFI','UPST','AFRM','LC']};
@@ -229,20 +229,20 @@ let _ttTf='',_ttDate='',_ttPrice=0;
 // Touch state
 let _touchMoving=false, _touchStartX=0, _touchStartY=0;
 TIMEFRAMES.forEach(tf=>{markers[tf]=[];});
-
+ 
 // ── Responsive ────────────────────────────────────────────────
 function checkMobile(){isMobile=window.innerWidth<=768;}
 function resizeCharts(){TIMEFRAMES.forEach(tf=>{const d=document.getElementById(`chart-${tf}`);if(d&&d._hasPlot)Plotly.Plots.resize(d);});}
 window.addEventListener('resize',()=>{checkMobile();setTimeout(resizeCharts,100);});
 checkMobile();
-
+ 
 function toggleNotes(){
   const col=document.getElementById('notes-col');
   if(isMobile){col.classList.toggle('mobile-show');col.classList.toggle('hidden',!col.classList.contains('mobile-show'));}
   else{notesVisible=!notesVisible;col.classList.toggle('hidden',!notesVisible);}
   setTimeout(resizeCharts,280);
 }
-
+ 
 // ── Sector ────────────────────────────────────────────────────
 function onSectorChange(){
   const s=document.getElementById('sector-sel').value,ts=document.getElementById('ticker-sel');
@@ -256,7 +256,7 @@ function onTickerSelect(){
   if(prev&&prev!==t){_predictCallback=()=>loadSymbol();openPredictDialog(prev);}
   else loadSymbol();
 }
-
+ 
 // ── DB ────────────────────────────────────────────────────────
 function setDbStatus(state,msg){
   const dot=document.getElementById('db-dot'),badge=document.getElementById('db-badge');
@@ -271,7 +271,7 @@ async function sendToDb(payload){
   try{const res=await fetch(dbEndpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const data=await res.json();if(res.ok){setDbStatus('ok',`id=${data.id}`);return data.id;}else{setDbStatus('err',data.message);return null;}}
   catch(e){setDbStatus('err',e.message);return null;}
 }
-
+ 
 // ── Math ──────────────────────────────────────────────────────
 function computeEma(arr,span){const k=2/(span+1),out=new Array(arr.length);out[0]=arr[0];for(let i=1;i<arr.length;i++)out[i]=arr[i]*k+out[i-1]*(1-k);return out;}
 function dateDiff(d1,d2){const a=new Date(d1+'T00:00:00'),b=new Date(d2+'T00:00:00');let mo=(b.getFullYear()-a.getFullYear())*12+(b.getMonth()-a.getMonth());let d=b.getDate()-a.getDate();if(d<0){mo--;d+=new Date(b.getFullYear(),b.getMonth(),0).getDate();}return{months:mo,days:d};}
@@ -280,7 +280,7 @@ function markerColor(k){return hsvToRgb((Math.floor(k/2)%20)/20,.78,k%2===0?1:.6
 function sliceByTf(data,tf){if(!data.length)return[];const last=new Date(data[data.length-1].date+'T00:00:00');let s;if(tf==='3M'){s=new Date(last);s.setMonth(s.getMonth()-3);}else if(tf==='6M'){s=new Date(last);s.setMonth(s.getMonth()-6);}else if(tf==='YTD'){s=new Date(last.getFullYear(),0,1);}else if(tf==='1Y'){s=new Date(last);s.setFullYear(s.getFullYear()-1);}else if(tf==='2Y'){s=new Date(last);s.setFullYear(s.getFullYear()-2);}else if(tf==='3Y'){s=new Date(last);s.setFullYear(s.getFullYear()-3);}else if(tf==='5Y'){s=new Date(last);s.setFullYear(s.getFullYear()-5);}else return data;return data.filter(r=>new Date(r.date+'T00:00:00')>=s);}
 function setStatus(msg){document.getElementById('status-text').textContent=msg;}
 function closestDateIdx(dates,target){const t=target.slice(0,10);let best=-1,bd=Infinity;dates.forEach((d,i)=>{const diff=Math.abs(Date.parse(d)-Date.parse(t));if(diff<bd){bd=diff;best=i;}});return best;}
-
+ 
 // ── Fetch ─────────────────────────────────────────────────────
 async function fetchDailyData(sym,key){
   const res=await fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${encodeURIComponent(sym)}&outputsize=full&datatype=json&apikey=${encodeURIComponent(key)}`);
@@ -295,7 +295,7 @@ async function fetchSearch(kw,key){
   const json=await res.json();
   return(json.bestMatches||[]).map(b=>({symbol:b['1. symbol'],name:b['2. name'],type:b['3. type'],region:b['4. region'],score:parseFloat(b['9. matchScore']||0)})).sort((a,b)=>b.score-a.score);
 }
-
+ 
 async function loadSymbol(){
   const sym=document.getElementById('symbol-input').value.trim().toUpperCase();
   const key=document.getElementById('api-key').value.trim();
@@ -311,7 +311,7 @@ async function loadSymbol(){
     setStatus(`Loaded ${sym} — ${rows.length} days.`);
   }catch(e){setStatus(`Error: ${e.message}`);}
 }
-
+ 
 // ── Zoom ──────────────────────────────────────────────────────
 function zoomChart(tf,dir){
   const div=document.getElementById(`chart-${tf}`);if(!div||!div._hasPlot)return;
@@ -321,7 +321,7 @@ function zoomChart(tf,dir){
   Plotly.relayout(div,{'xaxis.range':[new Date(mid-half*fac).toISOString().slice(0,10),new Date(mid+half*fac).toISOString().slice(0,10)]});
 }
 function resetZoom(tf){const div=document.getElementById(`chart-${tf}`);if(div&&div._hasPlot)Plotly.relayout(div,{'xaxis.autorange':true,'yaxis.autorange':true});}
-
+ 
 // ── Tooltip ───────────────────────────────────────────────────
 function showTooltip(tf,dateStr,price,cx,cy){
   _ttTf=tf;_ttDate=dateStr;_ttPrice=price;
@@ -340,7 +340,7 @@ function showTooltip(tf,dateStr,price,cx,cy){
 }
 function hideTooltip(){document.getElementById('hover-tooltip').style.display='none';}
 function markFromTooltip(){if(measureMode&&_ttTf&&_ttDate){addMarker(_ttTf,_ttDate);hideTooltip();}}
-
+ 
 // ── Coordinate converter ──────────────────────────────────────
 // Works for both mouse and touch events — takes clientX/Y
 function getChartPoint(div, tf, clientX, clientY){
@@ -361,7 +361,7 @@ function getChartPoint(div, tf, clientX, clientY){
   if(idx<0)return null;
   return{date:cd.dates[idx],price:cd.closes[idx]};
 }
-
+ 
 // ── Event listeners (mouse + touch) ──────────────────────────
 function attachListeners(div,tf){
   // MOUSE events
@@ -377,14 +377,14 @@ function attachListeners(div,tf){
     else showTooltip(tf,pt.date,pt.price,evt.clientX,evt.clientY);
   });
   div.addEventListener('mouseleave',()=>{/* keep visible for Mark button */});
-
+ 
   // TOUCH events — full support for iPad/iPhone
   div.addEventListener('touchstart',evt=>{
     _touchMoving=false;
     const t=evt.touches[0];
     _touchStartX=t.clientX;_touchStartY=t.clientY;
   },{passive:true});
-
+ 
   div.addEventListener('touchmove',evt=>{
     const t=evt.touches[0];
     const dx=Math.abs(t.clientX-_touchStartX),dy=Math.abs(t.clientY-_touchStartY);
@@ -393,7 +393,7 @@ function attachListeners(div,tf){
     const pt=getChartPoint(div,tf,t.clientX,t.clientY);
     if(pt)showTooltip(tf,pt.date,pt.price,t.clientX,t.clientY);
   },{passive:true});
-
+ 
   div.addEventListener('touchend',evt=>{
     if(_touchMoving){_touchMoving=false;return;} // Was a scroll/pan, not a tap
     evt.preventDefault(); // Prevent ghost mouse click
@@ -407,10 +407,10 @@ function attachListeners(div,tf){
       showTooltip(tf,pt.date,pt.price,t.clientX,t.clientY);
     }
   },{passive:false});
-
+ 
   div.on('plotly_relayout',l=>{div._layout=l;});
 }
-
+ 
 // ── Chart rendering ───────────────────────────────────────────
 function activeYArrays(tf){
   const cd=chartData[tf];if(!cd)return null;
@@ -426,12 +426,12 @@ function buildTraces(tf){
   if(showEma[200])traces.push({x:cd.dates,y:ya.ema200,type:'scatter',mode:'lines',name:'EMA200',line:{color:'#e94560',width:1.5,dash:'dash'},hoverinfo:'none'});
   return traces;
 }
-
+ 
 // ONLY vertical marker lines on chart — NO text annotations at all
 function buildShapes(tf){
   return markers[tf].map((m,k)=>({type:'line',x0:m.date,x1:m.date,y0:0,y1:1,yref:'paper',line:{color:markerColor(k),width:2}}));
 }
-
+ 
 function buildLayout(tf){
   const ya=activeYArrays(tf)||{label:'Price'};
   return{
@@ -445,16 +445,16 @@ function buildLayout(tf){
     hovermode:false,
   };
 }
-
+ 
 // ── Marker legend — date ranges first, then pair info ─────────
 function renderMarkerLegend(tf){
   const el=document.getElementById(`legend-${tf}`);if(!el)return;
   const cd=chartData[tf],ms=markers[tf];
   if(!cd||!ms.length){el.innerHTML='';return;}
-
+ 
   const nPairs=Math.floor(ms.length/2);
   let html='<div class="legend-chips">';
-
+ 
   if(showLabels){
     // Individual marker chips showing date + price (color coded)
     ms.forEach((m,k)=>{
@@ -463,7 +463,7 @@ function renderMarkerLegend(tf){
       html+=`<span class="marker-chip" style="color:${col};border-color:${col}40;background:${col}15">${role}: ${m.date} &nbsp;<strong>$${m.price.toFixed(2)}</strong></span>`;
     });
     html+='</div>';
-
+ 
     // Pair summary rows: date range first, then Δ info
     if(nPairs>0){
       for(let p=0;p<nPairs;p++){
@@ -492,10 +492,10 @@ function renderMarkerLegend(tf){
   } else {
     html+='</div>';
   }
-
+ 
   el.innerHTML=html;
 }
-
+ 
 function renderChart(tf){
   const div=document.getElementById(`chart-${tf}`);if(!div)return;
   const cd=chartData[tf];
@@ -515,7 +515,7 @@ function updateMarkerOverlay(tf){
   renderMarkerLegend(tf);
 }
 function rerenderAll(){TIMEFRAMES.forEach(tf=>renderChart(tf));}
-
+ 
 // ── Markers ───────────────────────────────────────────────────
 function addMarker(tf,dateStr){
   const cd=chartData[tf];if(!cd)return;
@@ -532,7 +532,7 @@ function addMarker(tf,dateStr){
 function deleteLastMarker(tf){const ms=markers[tf];if(!ms.length)return;if(ms.length%2===0)removePairNote(tf,ms.length/2);ms.pop();updateMarkerOverlay(tf);}
 function clearMarkers(tf){notes=notes.filter(n=>n._tf!==tf);markers[tf]=[];updateMarkerOverlay(tf);renderNotes();}
 function clearAllMarkers(){TIMEFRAMES.forEach(tf=>clearMarkers(tf));setStatus('All markers cleared.');}
-
+ 
 function copyMarkers(src,dest,clr){
   if(src===dest)return 0;const sd=markers[src].map(m=>m.date);if(!sd.length)return 0;
   if(clr)clearMarkers(dest);
@@ -550,7 +550,7 @@ function copyMarkers(src,dest,clr){
 }
 function panelCopy(src){const n=copyMarkers(src,document.getElementById(`dest-${src}`).value,document.getElementById(`clr-${src}`).checked);setStatus(`Copied ${n} from ${src}.`);}
 function panelCopyAll(src){let t=0;TIMEFRAMES.forEach(tf=>{if(tf!==src)t+=copyMarkers(src,tf,document.getElementById(`clr-${src}`).checked);});setStatus(`Copied → ALL (${t})`);}
-
+ 
 // ── Notes / DB ────────────────────────────────────────────────
 async function recordPairNote(tf,pairNum,m1,m2,cd){
   const i1=cd.dates.indexOf(m1.date),i2=cd.dates.indexOf(m2.date);if(i1<0||i2<0)return;
@@ -566,7 +566,7 @@ function removePairNote(tf,n){for(let i=notes.length-1;i>=0;i--){if(notes[i]._tf
 function dbCell(n){if(n.dbPending)return'<span style="color:#f0a030">⏳</span>';if(n.dbId)return`<span style="color:#2da44e">✓${n.dbId}</span>`;return dbEndpoint?'<span style="color:#e94560">✗</span>':'—';}
 function renderNotes(){document.getElementById('notes-body').innerHTML=notes.map(n=>`<tr><td>${n.symbol}</td><td>${n.date1}</td><td>${n.price1}</td><td>${n.date2}</td><td>${n.price2}</td><td style="color:${parseFloat(n.pctChg)>=0?'#2da44e':'#e94560'}">${n.pctChg}%</td><td>${n.months}</td><td>${n.days}</td><td>${n.trading_days}</td><td>${n.timeframe}</td><td>Δ${n._pair}</td><td>${dbCell(n)}</td></tr>`).join('');}
 function exportNotes(){if(!notes.length){alert('No notes yet.');return;}downloadCsv(['Sym','Date1','P1','Date2','P2','Chg%','Mo','Days','Trd','TF','Pair','DB'],notes.map(n=>[n.symbol,n.date1,n.price1,n.date2,n.price2,n.pctChg,n.months,n.days,n.trading_days,n.timeframe,`Δ${n._pair}`,n.dbId||'']),`notes_${currentSym}_${stamp()}.csv`);}
-
+ 
 // ── Predictions ───────────────────────────────────────────────
 function openPredictDialog(sym){document.getElementById('pd-symbol').value=sym||currentSym||'';const tmr=new Date();tmr.setDate(tmr.getDate()+1);document.getElementById('pd-date').value=tmr.toISOString().slice(0,10);document.getElementById('pd-price').value='';document.getElementById('pd-notes').value='';document.getElementById('predict-dialog').showModal();}
 function openPredict(){_predictCallback=null;openPredictDialog(document.getElementById('symbol-input').value.trim().toUpperCase()||currentSym);}
@@ -581,7 +581,7 @@ async function savePrediction(){
 function skipPrediction(){document.getElementById('predict-dialog').close();const cb=_predictCallback;_predictCallback=null;if(cb)cb();}
 function renderPredictions(){document.getElementById('pred-body').innerHTML=predictions.map(p=>`<tr><td>${p.symbol}</td><td>${p.createdAt}</td><td>${p.nextDate}</td><td>$${p.priceTarget}</td><td style="max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.notes||'—'}</td><td>${p.dbId?`<span style="color:#2da44e">✓${p.dbId}</span>`:p.dbPending?'⏳':dbEndpoint?'<span style="color:#e94560">✗</span>':'—'}</td></tr>`).join('');}
 function exportPredictions(){if(!predictions.length){alert('No predictions yet.');return;}downloadCsv(['Sym','Created','Next','Target','Notes','DB'],predictions.map(p=>[p.symbol,p.createdAt,p.nextDate,p.priceTarget,p.notes,p.dbId||'']),`preds_${currentSym}_${stamp()}.csv`);}
-
+ 
 // ── Search ────────────────────────────────────────────────────
 function openSearch(){document.getElementById('search-input').value=document.getElementById('symbol-input').value;document.getElementById('search-body').innerHTML='';_searchResults=[];_selectedRow=-1;document.getElementById('search-dialog').showModal();}
 async function doSearch(){
@@ -592,17 +592,17 @@ async function doSearch(){
 }
 function pickRow(i){if(_selectedRow>=0){const p=document.getElementById(`sr-${_selectedRow}`);if(p)p.classList.remove('selected');}_selectedRow=i;const r=document.getElementById(`sr-${i}`);if(r)r.classList.add('selected');}
 function applySearchResult(){if(_selectedRow<0||!_searchResults.length)return;const r=_searchResults[_selectedRow];if(r){document.getElementById('symbol-input').value=r.symbol;document.getElementById('search-dialog').close();loadSymbol();}}
-
+ 
 // ── Toggles ───────────────────────────────────────────────────
 function toggleMeasure(on){measureMode=on;document.body.classList.toggle('measure-on',on);setStatus(on?'Measure ON — tap/click chart to place markers':'Measure OFF — tap/hover to inspect price');}
 function toggleLabels(on){showLabels=on;TIMEFRAMES.forEach(tf=>renderMarkerLegend(tf));}
 function changeScale(val){scaleMode=val;rerenderAll();}
 function toggleEma(n,on){showEma[n]=on;rerenderAll();}
-
+ 
 // ── Utils ─────────────────────────────────────────────────────
 function downloadCsv(h,r,fn){const e=v=>`"${String(v).replace(/"/g,'""')}"`;const c=[h.map(e),...r.map(row=>row.map(e))].map(row=>row.join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([c],{type:'text/csv'}));a.download=fn;a.click();URL.revokeObjectURL(a.href);}
 function stamp(){return new Date().toISOString().slice(0,19).replace(/[T:]/g,'-');}
-
+ 
 // ── Build panels ──────────────────────────────────────────────
 function buildPanels(){
   const col=document.getElementById('charts-col');col.innerHTML='';
@@ -630,11 +630,11 @@ function buildPanels(){
     col.appendChild(wrap);
   });
 }
-
+ 
 // Close tooltip on outside click/tap
 document.addEventListener('click',e=>{const tt=document.getElementById('hover-tooltip');if(tt.style.display!=='none'&&!tt.contains(e.target))hideTooltip();},true);
 document.addEventListener('touchend',e=>{const tt=document.getElementById('hover-tooltip');if(tt.style.display!=='none'&&!tt.contains(e.target)&&!e.target.closest('.chart-wrap'))hideTooltip();},{passive:true});
-
+ 
 buildPanels();
 document.getElementById('db-endpoint').value='https://stock-api-production-1fbd.up.railway.app';
 testEndpoint();
