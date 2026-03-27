@@ -73,7 +73,7 @@
   <div class="tb-sep"></div>
   <!-- DB ENDPOINT -->
   <span class="tb-label">DB API</span>
-  <input type="text" id="db-endpoint" placeholder="https://yoursite.com/stockapi.php" style="width:240px"
+  <input type="text" id="db-endpoint" placeholder="https://yoursite.com/stockapi.php" value="https://stock-api-production-1fbd.up.railway.app" style="width:240px"
     onchange="testEndpoint()">
   <span id="db-badge" class="db-badge db-disconnected">not set</span>
   <div class="tb-sep"></div>
@@ -651,6 +651,9 @@ function buildPanels(){
 }
 
 buildPanels();
+// Auto-connect to hardcoded DB endpoint on load
+document.getElementById('db-endpoint').value = 'https://stock-api-production-1fbd.up.railway.app';
+testEndpoint();
 </script>
 </body>
 </html>
