@@ -2,90 +2,135 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Stock Marker Tool</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.27.0/plotly.min.js"></script>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: system-ui, -apple-system, sans-serif; background: #12192b; color: #e0e6f0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-  #toolbar { background: #1a2540; padding: 7px 12px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; border-bottom: 1px solid #2a3f6a; flex-shrink: 0; font-size: 13px; }
-  .tb-sep { width: 1px; height: 22px; background: #2a3f6a; margin: 0 3px; }
-  .tb-label { color: #8ca0c8; font-size: 12px; }
-  #main { display: flex; flex: 1; overflow: hidden; }
-  #charts-col { flex: 62; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 14px; }
-  #notes-col { flex: 38; background: #1a2540; border-left: 1px solid #2a3f6a; display: flex; flex-direction: column; overflow: hidden; padding: 10px; gap: 0; }
-  .chart-panel { background: #1a2540; border: 1px solid #2a3f6a; border-radius: 7px; padding: 8px 10px 6px; }
-  .chart-title { font-weight: 700; font-size: 13px; color: #e94560; margin-bottom: 4px; }
-  .chart-footer { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 5px; font-size: 12px; }
-  .section-hd { font-weight: 700; font-size: 12px; color: #e94560; padding: 6px 0 4px; letter-spacing: .04em; text-transform: uppercase; flex-shrink: 0; }
-  .tbl-wrap { flex: 1; overflow-y: auto; min-height: 60px; }
-  .tbl-wrap-sm { flex: 0 0 180px; overflow-y: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: 11px; }
-  thead th { background: #12192b; padding: 5px 4px; text-align: left; border-bottom: 1px solid #e94560; position: sticky; top: 0; white-space: nowrap; color: #8ca0c8; font-weight: 600; font-size: 10px; text-transform: uppercase; }
-  td { padding: 4px; border-bottom: 1px solid #1e2f50; }
-  tr:hover td { background: #1e2f50; }
-  .divider { height: 1px; background: #2a3f6a; margin: 8px 0; flex-shrink: 0; }
-  #status { font-size: 11px; padding: 3px 10px; background: #1a2540; border-top: 1px solid #2a3f6a; flex-shrink: 0; min-height: 20px; display: flex; align-items: center; gap: 8px; }
-  .status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-  .dot-ok { background: #2da44e; }
-  .dot-err { background: #e94560; }
-  .dot-busy { background: #f0a030; animation: pulse .8s ease-in-out infinite; }
-  .dot-idle { background: #3a4f70; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-  input[type=text], input[type=password], input[type=number], input[type=date], select, textarea { background: #12192b; color: #e0e6f0; border: 1px solid #2a3f6a; border-radius: 4px; padding: 4px 7px; font-size: 12px; font-family: inherit; }
-  input:focus, select:focus, textarea:focus { outline: none; border-color: #e94560; }
-  button { background: #1e2f50; color: #e0e6f0; border: 1px solid #2a3f6a; border-radius: 4px; padding: 4px 10px; cursor: pointer; font-size: 12px; white-space: nowrap; font-family: inherit; transition: background .15s, border-color .15s; }
-  button:hover { background: #e94560; border-color: #e94560; color: #fff; }
-  button.accent { border-color: #e94560; color: #e94560; }
-  button.sm { padding: 3px 7px; font-size: 11px; }
-  label { font-size: 12px; display: flex; align-items: center; gap: 4px; cursor: pointer; }
-  input[type=checkbox] { cursor: pointer; accent-color: #e94560; width: 13px; height: 13px; }
-  dialog { background: #1a2540; color: #e0e6f0; border: 1px solid #e94560; border-radius: 9px; padding: 22px 24px; min-width: 360px; max-width: 500px; font-family: inherit; font-size: 13px; }
-  dialog::backdrop { background: rgba(0,0,0,.65); }
-  dialog h3 { color: #e94560; margin-bottom: 16px; font-size: 15px; }
-  dialog .form-row { margin-bottom: 11px; }
-  dialog .form-row label { display: block; color: #8ca0c8; font-size: 11px; margin-bottom: 3px; text-transform: uppercase; letter-spacing: .04em; }
-  dialog .form-row input, dialog .form-row textarea, dialog .form-row select { width: 100%; }
-  dialog textarea { resize: vertical; min-height: 70px; }
-  .dlg-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
-  #search-body tr { cursor: pointer; }
-  #search-body tr.selected td { background: #e94560 !important; color: #fff; }
-  body.measure-on #measure-chk-lbl { color: #e94560; font-weight: 700; }
-  .logo { font-weight: 800; font-size: 14px; color: #e94560; letter-spacing: .04em; margin-right: 4px; }
-  .db-badge { font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: 600; }
-  .db-connected { background: #0d2b1a; color: #2da44e; border: 1px solid #2da44e44; }
-  .db-disconnected { background: #2b0d0d; color: #e94560; border: 1px solid #e9456044; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, -apple-system, sans-serif; background: #12192b; color: #e0e6f0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+ 
+#toolbar { background: #1a2540; padding: 6px 10px; display: flex; flex-wrap: nowrap; gap: 5px; align-items: center; border-bottom: 1px solid #2a3f6a; flex-shrink: 0; font-size: 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+#toolbar::-webkit-scrollbar { display: none; }
+.tb-sep { width: 1px; min-width: 1px; height: 20px; background: #2a3f6a; margin: 0 2px; }
+.tb-label { color: #8ca0c8; font-size: 11px; white-space: nowrap; }
+ 
+#main { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+#charts-col { flex: 1; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 12px; min-width: 0; -webkit-overflow-scrolling: touch; }
+#notes-col { width: 360px; min-width: 0; background: #1a2540; border-left: 1px solid #2a3f6a; display: flex; flex-direction: column; overflow: hidden; padding: 8px; flex-shrink: 0; transition: width .25s ease, padding .25s ease; }
+#notes-col.hidden { width: 0; padding: 0; }
+ 
+.chart-panel { background: #1a2540; border: 1px solid #2a3f6a; border-radius: 7px; padding: 6px 8px 5px; }
+.chart-title { font-weight: 700; font-size: 12px; color: #e94560; margin-bottom: 3px; display: flex; align-items: center; gap: 6px; }
+.chart-wrap { width: 100%; }
+.chart-footer { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-top: 4px; font-size: 11px; }
+ 
+/* Marker legend below each chart */
+.marker-legend { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; padding: 5px 6px; background: #12192b; border-radius: 5px; min-height: 0; }
+.marker-legend:empty { display: none; }
+.marker-chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 10px; font-size: 10px; border: 1px solid; white-space: nowrap; }
+.pair-row { width: 100%; display: flex; align-items: center; gap: 6px; padding: 2px 0; font-size: 10px; color: #8ca0c8; border-top: 1px solid #1e2f50; margin-top: 2px; }
+.pair-row:first-of-type { border-top: none; margin-top: 0; }
+ 
+.section-hd { font-weight: 700; font-size: 11px; color: #e94560; padding: 4px 0 3px; letter-spacing: .04em; text-transform: uppercase; flex-shrink: 0; }
+.tbl-wrap { flex: 1; overflow-y: auto; min-height: 40px; }
+.tbl-wrap-sm { flex: 0 0 150px; overflow-y: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 10px; }
+thead th { background: #12192b; padding: 4px 3px; text-align: left; border-bottom: 1px solid #e94560; position: sticky; top: 0; white-space: nowrap; color: #8ca0c8; font-weight: 600; font-size: 9px; text-transform: uppercase; }
+td { padding: 3px; border-bottom: 1px solid #1e2f50; white-space: nowrap; }
+tr:hover td { background: #1e2f50; }
+.divider { height: 1px; background: #2a3f6a; margin: 6px 0; flex-shrink: 0; }
+ 
+#status { font-size: 11px; padding: 2px 8px; background: #1a2540; border-top: 1px solid #2a3f6a; flex-shrink: 0; display: flex; align-items: center; gap: 6px; min-height: 18px; }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.dot-ok{background:#2da44e;}.dot-err{background:#e94560;}
+.dot-busy{background:#f0a030;animation:pulse .8s infinite;}.dot-idle{background:#3a4f70;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+ 
+input[type=text],input[type=password],input[type=number],input[type=date],select,textarea {
+  background:#12192b;color:#e0e6f0;border:1px solid #2a3f6a;border-radius:4px;padding:3px 6px;font-size:11px;font-family:inherit;min-width:0;
+}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#e94560;}
+button{background:#1e2f50;color:#e0e6f0;border:1px solid #2a3f6a;border-radius:4px;padding:3px 8px;cursor:pointer;font-size:11px;white-space:nowrap;font-family:inherit;transition:background .15s;-webkit-tap-highlight-color:transparent;}
+button:hover,button:active{background:#e94560;border-color:#e94560;color:#fff;}
+button.accent{border-color:#e94560;color:#e94560;}
+button.sm{padding:2px 6px;font-size:10px;}
+button.zoom-btn{padding:1px 7px;font-size:13px;font-weight:700;background:#12192b;min-width:26px;}
+label{font-size:11px;display:flex;align-items:center;gap:3px;cursor:pointer;white-space:nowrap;}
+input[type=checkbox]{cursor:pointer;accent-color:#e94560;width:12px;height:12px;}
+ 
+/* Custom tooltip — ONLY tooltip, Plotly hover fully disabled */
+#hover-tooltip {
+  position: fixed; display: none; z-index: 9999;
+  background: #1a2540; border: 1.5px solid #e94560; border-radius: 7px;
+  padding: 9px 12px; font-size: 12px; pointer-events: auto;
+  min-width: 160px; box-shadow: 0 4px 20px rgba(0,0,0,.55);
+}
+#hover-tooltip .tt-date{font-weight:700;color:#e0e6f0;font-size:13px;margin-bottom:2px;}
+#hover-tooltip .tt-price{color:#4e9af1;font-size:13px;margin-bottom:8px;}
+#hover-tooltip .tt-btns{display:flex;gap:5px;}
+ 
+dialog{background:#1a2540;color:#e0e6f0;border:1px solid #e94560;border-radius:9px;padding:18px 20px;width:min(95vw,420px);font-family:inherit;font-size:13px;}
+dialog::backdrop{background:rgba(0,0,0,.7);}
+dialog h3{color:#e94560;margin-bottom:14px;font-size:14px;}
+dialog .form-row{margin-bottom:10px;}
+dialog .form-row label{display:block;color:#8ca0c8;font-size:10px;margin-bottom:2px;text-transform:uppercase;letter-spacing:.04em;}
+dialog .form-row input,dialog .form-row textarea,dialog .form-row select{width:100%;}
+dialog textarea{resize:vertical;min-height:60px;}
+.dlg-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;}
+#search-body tr{cursor:pointer;}
+#search-body tr.selected td{background:#e94560!important;color:#fff;}
+.logo{font-weight:800;font-size:13px;color:#e94560;letter-spacing:.04em;white-space:nowrap;}
+.db-badge{font-size:10px;padding:1px 5px;border-radius:8px;font-weight:600;white-space:nowrap;}
+.db-connected{background:#0d2b1a;color:#2da44e;border:1px solid #2da44e44;}
+.db-disconnected{background:#2b0d0d;color:#e94560;border:1px solid #e9456044;}
+body.measure-on #measure-chk-lbl{color:#e94560;font-weight:700;}
+ 
+@media(max-width:768px){
+  #notes-col{display:none;}
+  #notes-col.mobile-show{display:flex;position:fixed;inset:0;z-index:500;width:100%!important;padding:12px;background:#1a2540;}
+  .chart-wrap{height:240px!important;}
+}
+@media(min-width:769px) and (max-width:1100px){
+  #notes-col:not(.hidden){width:260px;}
+  .chart-wrap{height:270px!important;}
+}
+@media(min-width:1101px){.chart-wrap{height:290px!important;}}
 </style>
 </head>
 <body>
-
+ 
 <div id="toolbar">
   <span class="logo">📈 StockMarker</span>
   <div class="tb-sep"></div>
-  <span class="tb-label">API Key</span>
-  <input type="password" id="api-key" placeholder="Alpha Vantage key" style="width:190px" value="G10DKKO18ZML0449">
+  <span class="tb-label">Sector</span>
+  <select id="sector-sel" onchange="onSectorChange()" style="width:110px">
+    <option value="">— sector —</option>
+    <option value="tech">Technology</option>
+    <option value="finance">Finance</option>
+    <option value="healthcare">Healthcare</option>
+    <option value="energy">Energy</option>
+    <option value="consumer">Consumer</option>
+    <option value="industrials">Industrials</option>
+    <option value="utilities">Utilities</option>
+    <option value="realestate">Real Estate</option>
+    <option value="materials">Materials</option>
+    <option value="crypto">Crypto-related</option>
+  </select>
+  <select id="ticker-sel" onchange="onTickerSelect()" style="display:none;width:88px"></select>
   <div class="tb-sep"></div>
   <span class="tb-label">Symbol</span>
-  <input type="text" id="symbol-input" placeholder="AAPL" style="width:90px" value="AAPL"
-    onkeydown="if(event.key==='Enter') loadSymbol()">
+  <input type="text" id="symbol-input" placeholder="AAPL" style="width:68px" value="AAPL" onkeydown="if(event.key==='Enter') loadSymbol()">
   <button class="accent" onclick="loadSymbol()">Load</button>
   <button onclick="openSearch()">Search…</button>
   <div class="tb-sep"></div>
-  <!-- DB ENDPOINT -->
-  <span class="tb-label">DB API</span>
-  <input type="text" id="db-endpoint" placeholder="https://yoursite.com/stockapi.php" value="https://stock-api-production-1fbd.up.railway.app" style="width:240px"
-    onchange="testEndpoint()">
-  <span id="db-badge" class="db-badge db-disconnected">not set</span>
+  <span class="tb-label">DB</span>
+  <input type="text" id="db-endpoint" style="width:165px" value="https://stock-api-production-1fbd.up.railway.app" onchange="testEndpoint()">
+  <span id="db-badge" class="db-badge db-disconnected">—</span>
   <div class="tb-sep"></div>
-  <label id="measure-chk-lbl">
-    <input type="checkbox" id="measure-chk" onchange="toggleMeasure(this.checked)"> Measure mode
-  </label>
-  <label>
-    <input type="checkbox" id="labels-chk" checked onchange="toggleLabels(this.checked)"> Labels
-  </label>
+  <label id="measure-chk-lbl"><input type="checkbox" id="measure-chk" onchange="toggleMeasure(this.checked)"> Measure</label>
+  <label><input type="checkbox" id="labels-chk" checked onchange="toggleLabels(this.checked)"> Labels</label>
   <div class="tb-sep"></div>
-  <span class="tb-label">Scale</span>
-  <select id="scale-sel" onchange="changeScale(this.value)" style="width:90px">
+  <select id="scale-sel" onchange="changeScale(this.value)" style="width:78px">
     <option value="price">Price</option>
     <option value="log">Log</option>
     <option value="pct">% Change</option>
@@ -95,70 +140,74 @@
   <label><input type="checkbox" id="ema50-chk" checked onchange="toggleEma(50,this.checked)"> EMA50</label>
   <label><input type="checkbox" id="ema200-chk" onchange="toggleEma(200,this.checked)"> EMA200</label>
   <div class="tb-sep"></div>
-  <button onclick="clearAllMarkers()">Clear All Markers</button>
+  <button onclick="clearAllMarkers()">Clear All</button>
   <button onclick="openPredict()">Predict…</button>
+  <button onclick="toggleNotes()">📋 Notes</button>
+  <div class="tb-sep"></div>
+  <span class="tb-label">API Key</span>
+  <input type="password" id="api-key" style="width:135px" value="G10DKKO18ZML0449">
 </div>
-
+ 
 <div id="main">
   <div id="charts-col"></div>
   <div id="notes-col">
-    <div class="section-hd">Notes — pair measurements</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <div class="section-hd">Pair Measurements</div>
+      <button class="sm" onclick="toggleNotes()">✕</button>
+    </div>
     <div class="tbl-wrap">
       <table>
-        <thead><tr>
-          <th>Sym</th><th>Date 1</th><th>Price 1</th>
-          <th>Date 2</th><th>Price 2</th><th>Δ%</th>
-          <th>Mo</th><th>Days</th><th>Trd</th><th>TF</th><th>Pair</th><th>DB</th>
-        </tr></thead>
+        <thead><tr><th>Sym</th><th>Date 1</th><th>P1</th><th>Date 2</th><th>P2</th><th>Δ%</th><th>Mo</th><th>D</th><th>Trd</th><th>TF</th><th>#</th><th>DB</th></tr></thead>
         <tbody id="notes-body"></tbody>
       </table>
     </div>
-    <button class="sm" style="margin-top:6px;align-self:flex-start" onclick="exportNotes()">⬇ Export Notes CSV</button>
-    <div class="divider" style="margin-top:10px"></div>
-    <div class="section-hd">Price Prediction Notes</div>
+    <button class="sm" style="margin-top:5px;align-self:flex-start" onclick="exportNotes()">⬇ CSV</button>
+    <div class="divider"></div>
+    <div class="section-hd">Price Predictions</div>
     <div class="tbl-wrap-sm">
       <table>
-        <thead><tr>
-          <th>Sym</th><th>Created</th><th>Next Date</th><th>Target</th><th>Notes</th><th>DB</th>
-        </tr></thead>
+        <thead><tr><th>Sym</th><th>Created</th><th>Next</th><th>Target</th><th>Notes</th><th>DB</th></tr></thead>
         <tbody id="pred-body"></tbody>
       </table>
     </div>
-    <button class="sm" style="margin-top:6px;align-self:flex-start" onclick="exportPredictions()">⬇ Export Predictions CSV</button>
+    <button class="sm" style="margin-top:5px;align-self:flex-start" onclick="exportPredictions()">⬇ CSV</button>
   </div>
 </div>
-
+ 
 <div id="status">
   <div class="status-dot dot-idle" id="db-dot"></div>
-  <span id="status-text">Ready — enter an API key and symbol then click Load.</span>
+  <span id="status-text">Ready.</span>
 </div>
-
-<!-- Prediction dialog -->
+ 
+<!-- Single custom tooltip — Plotly hover completely off -->
+<div id="hover-tooltip">
+  <div class="tt-date" id="tt-date">—</div>
+  <div class="tt-price" id="tt-price">—</div>
+  <div class="tt-btns">
+    <button class="sm accent" id="tt-mark-btn" onclick="markFromTooltip()">📌 Mark</button>
+    <button class="sm" onclick="hideTooltip()">✕</button>
+  </div>
+</div>
+ 
 <dialog id="predict-dialog">
   <h3>💡 Price Prediction</h3>
   <div class="form-row"><label>Stock ticker</label><input type="text" id="pd-symbol"></div>
   <div class="form-row"><label>Date of next move</label><input type="date" id="pd-date"></div>
-  <div class="form-row"><label>Price target ($)</label>
-    <input type="number" id="pd-price" step="0.0001" min="0.0001" placeholder="e.g. 195.50">
-  </div>
-  <div class="form-row"><label>Notes</label>
-    <textarea id="pd-notes" placeholder="Optional notes…"></textarea>
-  </div>
+  <div class="form-row"><label>Price target ($)</label><input type="number" id="pd-price" step="0.0001" min="0.0001" placeholder="e.g. 195.50"></div>
+  <div class="form-row"><label>Notes</label><textarea id="pd-notes" placeholder="Optional notes…"></textarea></div>
   <div class="dlg-btns">
-    <button onclick="savePrediction()">Save</button>
-    <button onclick="document.getElementById('predict-dialog').close()">Skip</button>
+    <button id="pred-save-btn" onclick="savePrediction()">Save</button>
+    <button id="pred-skip-btn" onclick="skipPrediction()">Skip</button>
   </div>
 </dialog>
-
-<!-- Search dialog -->
+ 
 <dialog id="search-dialog">
   <h3>🔍 Symbol Search</h3>
   <div style="display:flex;gap:8px;margin-bottom:10px">
-    <input type="text" id="search-input" placeholder="Company or ticker" style="flex:1"
-      onkeydown="if(event.key==='Enter') doSearch()">
+    <input type="text" id="search-input" placeholder="Company or ticker" style="flex:1" onkeydown="if(event.key==='Enter') doSearch()">
     <button onclick="doSearch()">Search</button>
   </div>
-  <div style="max-height:280px;overflow-y:auto;border:1px solid #2a3f6a;border-radius:4px">
+  <div style="max-height:260px;overflow-y:auto;border:1px solid #2a3f6a;border-radius:4px">
     <table style="width:100%">
       <thead><tr><th>Symbol</th><th>Name</th><th>Type</th><th>Region</th></tr></thead>
       <tbody id="search-body"></tbody>
@@ -169,490 +218,423 @@
     <button onclick="document.getElementById('search-dialog').close()">Cancel</button>
   </div>
 </dialog>
-
+ 
 <script>
 'use strict';
-
-const TIMEFRAMES = ['3M','6M','YTD','1Y','2Y','3Y','5Y'];
-const MAX_MARKERS = 40;
-
-let rawData=[], chartData={}, markers={}, notes=[], predictions=[];
-let measureMode=false, showLabels=true, scaleMode='price', showEma={20:true,50:true,200:false};
-let currentSym='', _searchResults=[], _selectedRow=-1;
-let dbEndpoint='', dbConnected=false;
-
-TIMEFRAMES.forEach(tf => { markers[tf]=[]; });
-
-// ── DB API ────────────────────────────────────────────────────
-function setDbStatus(state, msg) {
-  const dot  = document.getElementById('db-dot');
-  const badge= document.getElementById('db-badge');
-  dot.className  = 'status-dot ' + (state==='ok'?'dot-ok': state==='busy'?'dot-busy':'dot-err');
-  badge.className= 'db-badge ' + (state==='ok'?'db-connected':'db-disconnected');
-  badge.textContent = state==='ok'?'connected': state==='busy'?'saving…':'not set';
-  if (msg) setStatus(msg);
+const SECTORS={tech:['AAPL','MSFT','NVDA','GOOGL','META','AMZN','TSM','AVGO','ORCL','CRM','AMD','INTC','QCOM','TXN','MU','ADBE','NOW','SNOW','PLTR','NET'],finance:['JPM','BAC','GS','MS','WFC','V','MA','AXP','C','BLK','SCHW','USB','PNC','TFC','COF','ICE','CME','SPGI','MCO','BX'],healthcare:['UNH','JNJ','LLY','ABBV','MRK','TMO','ABT','DHR','BMY','AMGN','PFE','CVS','CI','HUM','MDT','BSX','SYK','ISRG','VRTX','REGN'],energy:['XOM','CVX','COP','EOG','SLB','MPC','PSX','VLO','OXY','HAL','PXD','DVN','FANG','HES','MRO','APA','BKR','NOV','HP','WHD'],consumer:['TSLA','HD','MCD','NKE','SBUX','TGT','LOW','TJX','COST','WMT','PG','KO','PEP','PM','MO','EL','CL','GIS','K','CPB'],industrials:['CAT','HON','UPS','BA','GE','RTX','LMT','DE','EMR','ETN','ITW','PH','ROK','AME','FDX','CSX','UNP','NSC','WM','RSG'],utilities:['NEE','DUK','SO','D','AEP','EXC','SRE','XEL','ES','WEC','ED','ETR','PPL','FE','AEE','CMS','NI','LNT','EVRG','PNW'],realestate:['AMT','PLD','CCI','EQIX','SPG','PSA','DLR','O','WELL','AVB','EQR','MAA','UDR','CPT','ESS','NLY','AGNC','MPW','VNO','IRM'],materials:['LIN','APD','ECL','SHW','NEM','FCX','NUE','VMC','MLM','DOW','DD','PPG','ALB','MOS','CF','IFF','FMC','SEE','AMCR','PKG'],crypto:['COIN','MSTR','MARA','RIOT','HUT','CLSK','CIFR','BTBT','SQ','PYPL','HOOD','SOFI','UPST','AFRM','LC']};
+const TIMEFRAMES=['3M','6M','YTD','1Y','2Y','3Y','5Y'];
+const MAX_MARKERS=40;
+let rawData=[],chartData={},markers={},notes=[],predictions=[];
+let measureMode=false,showLabels=true,scaleMode='price',showEma={20:true,50:true,200:false};
+let currentSym='',_searchResults=[],_selectedRow=-1,dbEndpoint='';
+let notesVisible=true,isMobile=false;
+let _ttTf='',_ttDate='',_ttPrice=0,_predictCallback=null;
+TIMEFRAMES.forEach(tf=>{markers[tf]=[];});
+ 
+// ── Responsive ────────────────────────────────────────────────
+function checkMobile(){isMobile=window.innerWidth<=768;}
+function resizeCharts(){TIMEFRAMES.forEach(tf=>{const d=document.getElementById(`chart-${tf}`);if(d&&d._hasPlot)Plotly.Plots.resize(d);});}
+window.addEventListener('resize',()=>{checkMobile();setTimeout(resizeCharts,100);});
+checkMobile();
+ 
+// ── Notes toggle ──────────────────────────────────────────────
+function toggleNotes(){
+  const col=document.getElementById('notes-col');
+  if(isMobile){col.classList.toggle('mobile-show');col.classList.toggle('hidden',!col.classList.contains('mobile-show'));}
+  else{notesVisible=!notesVisible;col.classList.toggle('hidden',!notesVisible);}
+  setTimeout(resizeCharts,280);
 }
-
-function testEndpoint() {
-  dbEndpoint = document.getElementById('db-endpoint').value.trim();
-  if (!dbEndpoint) { setDbStatus('err','No DB endpoint set.'); return; }
-  setDbStatus('ok','DB endpoint saved — will send data on next pair/prediction.');
-  dbConnected = true;
+ 
+// ── Sector ────────────────────────────────────────────────────
+function onSectorChange(){
+  const s=document.getElementById('sector-sel').value,ts=document.getElementById('ticker-sel');
+  if(!s){ts.style.display='none';return;}
+  ts.innerHTML='<option value="">— ticker —</option>'+(SECTORS[s]||[]).map(t=>`<option value="${t}">${t}</option>`).join('');
+  ts.style.display='';
 }
-
-async function sendToDb(payload) {
-  if (!dbEndpoint) return null;
-  setDbStatus('busy');
-  try {
-    const res  = await fetch(dbEndpoint, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(payload),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      setDbStatus('ok', `Saved to DB (id=${data.id})`);
-      return data.id;
-    } else {
-      setDbStatus('err', `DB error: ${data.message}`);
-      return null;
-    }
-  } catch(e) {
-    setDbStatus('err', `DB unreachable: ${e.message}`);
-    return null;
-  }
+function onTickerSelect(){
+  const t=document.getElementById('ticker-sel').value;if(!t) return;
+  const prev=currentSym;
+  document.getElementById('symbol-input').value=t;
+  if(prev&&prev!==t){_predictCallback=()=>loadSymbol();openPredictDialog(prev);}
+  else loadSymbol();
 }
-
-// ── Math helpers ──────────────────────────────────────────────
-function computeEma(arr, span) {
-  const k=2/(span+1), out=new Array(arr.length);
-  out[0]=arr[0];
-  for(let i=1;i<arr.length;i++) out[i]=arr[i]*k+out[i-1]*(1-k);
-  return out;
+ 
+// ── DB ────────────────────────────────────────────────────────
+function setDbStatus(state,msg){
+  const dot=document.getElementById('db-dot'),badge=document.getElementById('db-badge');
+  dot.className='status-dot '+(state==='ok'?'dot-ok':state==='busy'?'dot-busy':'dot-err');
+  badge.className='db-badge '+(state==='ok'?'db-connected':'db-disconnected');
+  badge.textContent=state==='ok'?'connected':state==='busy'?'…':'—';
+  if(msg)setStatus(msg);
 }
-
-function dateDiff(d1, d2) {
-  const a=new Date(d1+'T00:00:00'), b=new Date(d2+'T00:00:00');
-  let months=(b.getFullYear()-a.getFullYear())*12+(b.getMonth()-a.getMonth());
-  let days=b.getDate()-a.getDate();
-  if(days<0){months--;days+=new Date(b.getFullYear(),b.getMonth(),0).getDate();}
-  return {months,days};
+function testEndpoint(){dbEndpoint=document.getElementById('db-endpoint').value.trim();setDbStatus(dbEndpoint?'ok':'err');}
+async function sendToDb(payload){
+  if(!dbEndpoint)return null;setDbStatus('busy');
+  try{const res=await fetch(dbEndpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const data=await res.json();if(res.ok){setDbStatus('ok',`id=${data.id}`);return data.id;}else{setDbStatus('err',`${data.message}`);return null;}}
+  catch(e){setDbStatus('err',`${e.message}`);return null;}
 }
-
-function hsvToRgb(h,s,v){
-  const i=Math.floor(h*6),f=h*6-i,p=v*(1-s),q=v*(1-f*s),t=v*(1-(1-f)*s);
-  let r,g,b;
-  switch(i%6){case 0:r=v;g=t;b=p;break;case 1:r=q;g=v;b=p;break;case 2:r=p;g=v;b=t;break;case 3:r=p;g=q;b=v;break;case 4:r=t;g=p;b=v;break;case 5:r=v;g=p;b=q;break;}
-  return `rgb(${Math.round(r*255)},${Math.round(g*255)},${Math.round(b*255)})`;
-}
+ 
+// ── Math ──────────────────────────────────────────────────────
+function computeEma(arr,span){const k=2/(span+1),out=new Array(arr.length);out[0]=arr[0];for(let i=1;i<arr.length;i++)out[i]=arr[i]*k+out[i-1]*(1-k);return out;}
+function dateDiff(d1,d2){const a=new Date(d1+'T00:00:00'),b=new Date(d2+'T00:00:00');let months=(b.getFullYear()-a.getFullYear())*12+(b.getMonth()-a.getMonth());let days=b.getDate()-a.getDate();if(days<0){months--;days+=new Date(b.getFullYear(),b.getMonth(),0).getDate();}return{months,days};}
+function hsvToRgb(h,s,v){const i=Math.floor(h*6),f=h*6-i,p=v*(1-s),q=v*(1-f*s),t=v*(1-(1-f)*s);let r,g,b;switch(i%6){case 0:r=v;g=t;b=p;break;case 1:r=q;g=v;b=p;break;case 2:r=p;g=v;b=t;break;case 3:r=p;g=q;b=v;break;case 4:r=t;g=p;b=v;break;case 5:r=v;g=p;b=q;break;}return`rgb(${Math.round(r*255)},${Math.round(g*255)},${Math.round(b*255)})`;}
 function markerColor(k){return hsvToRgb((Math.floor(k/2)%20)/20,.78,k%2===0?1:.68);}
-
-function sliceByTf(data,tf){
-  if(!data.length) return [];
-  const last=new Date(data[data.length-1].date+'T00:00:00');
-  let start;
-  if(tf==='3M'){start=new Date(last);start.setMonth(start.getMonth()-3);}
-  else if(tf==='6M'){start=new Date(last);start.setMonth(start.getMonth()-6);}
-  else if(tf==='YTD'){start=new Date(last.getFullYear(),0,1);}
-  else if(tf==='1Y'){start=new Date(last);start.setFullYear(start.getFullYear()-1);}
-  else if(tf==='2Y'){start=new Date(last);start.setFullYear(start.getFullYear()-2);}
-  else if(tf==='3Y'){start=new Date(last);start.setFullYear(start.getFullYear()-3);}
-  else if(tf==='5Y'){start=new Date(last);start.setFullYear(start.getFullYear()-5);}
-  else return data;
-  return data.filter(r=>new Date(r.date+'T00:00:00')>=start);
-}
-
+function sliceByTf(data,tf){if(!data.length)return[];const last=new Date(data[data.length-1].date+'T00:00:00');let s;if(tf==='3M'){s=new Date(last);s.setMonth(s.getMonth()-3);}else if(tf==='6M'){s=new Date(last);s.setMonth(s.getMonth()-6);}else if(tf==='YTD'){s=new Date(last.getFullYear(),0,1);}else if(tf==='1Y'){s=new Date(last);s.setFullYear(s.getFullYear()-1);}else if(tf==='2Y'){s=new Date(last);s.setFullYear(s.getFullYear()-2);}else if(tf==='3Y'){s=new Date(last);s.setFullYear(s.getFullYear()-3);}else if(tf==='5Y'){s=new Date(last);s.setFullYear(s.getFullYear()-5);}else return data;return data.filter(r=>new Date(r.date+'T00:00:00')>=s);}
 function setStatus(msg){document.getElementById('status-text').textContent=msg;}
-
-// ── Alpha Vantage ─────────────────────────────────────────────
-async function fetchDailyData(symbol,apiKey){
-  const url=`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${encodeURIComponent(symbol)}&outputsize=full&datatype=json&apikey=${encodeURIComponent(apiKey)}`;
-  const res=await fetch(url);
-  if(!res.ok) throw new Error(`HTTP ${res.status}`);
-  const json=await res.json();
-  if(json['Information']) throw new Error(json['Information']);
-  if(json['Note']) throw new Error(json['Note']);
-  if(!json['Time Series (Daily)']) throw new Error(JSON.stringify(json).slice(0,200));
-  const rows=Object.entries(json['Time Series (Daily)']).map(([d,v])=>({
-    date:d, open:parseFloat(v['1. open']), high:parseFloat(v['2. high']),
-    low:parseFloat(v['3. low']), close:parseFloat(v['4. close']),
-  }));
-  rows.sort((a,b)=>a.date<b.date?-1:1);
-  return rows;
+function closestDateIdx(dates,target){const t=target.slice(0,10);let best=-1,bestDiff=Infinity;dates.forEach((d,i)=>{const diff=Math.abs(Date.parse(d)-Date.parse(t));if(diff<bestDiff){bestDiff=diff;best=i;}});return best;}
+ 
+// ── Fetch ─────────────────────────────────────────────────────
+async function fetchDailyData(sym,key){
+  const res=await fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${encodeURIComponent(sym)}&outputsize=full&datatype=json&apikey=${encodeURIComponent(key)}`);
+  if(!res.ok)throw new Error(`HTTP ${res.status}`);const json=await res.json();
+  if(json['Information'])throw new Error(json['Information']);if(json['Note'])throw new Error(json['Note']);
+  if(!json['Time Series (Daily)'])throw new Error('No data');
+  const rows=Object.entries(json['Time Series (Daily)']).map(([d,v])=>({date:d,open:parseFloat(v['1. open']),high:parseFloat(v['2. high']),low:parseFloat(v['3. low']),close:parseFloat(v['4. close'])}));
+  rows.sort((a,b)=>a.date<b.date?-1:1);return rows;
 }
-
-async function fetchSearch(kw,apiKey){
-  const res=await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${encodeURIComponent(kw)}&apikey=${encodeURIComponent(apiKey)}`);
+async function fetchSearch(kw,key){
+  const res=await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${encodeURIComponent(kw)}&apikey=${encodeURIComponent(key)}`);
   const json=await res.json();
-  return (json.bestMatches||[]).map(b=>({symbol:b['1. symbol'],name:b['2. name'],type:b['3. type'],region:b['4. region'],score:parseFloat(b['9. matchScore']||0)})).sort((a,b)=>b.score-a.score);
+  return(json.bestMatches||[]).map(b=>({symbol:b['1. symbol'],name:b['2. name'],type:b['3. type'],region:b['4. region'],score:parseFloat(b['9. matchScore']||0)})).sort((a,b)=>b.score-a.score);
 }
-
-// ── Load symbol ───────────────────────────────────────────────
+ 
 async function loadSymbol(){
   const sym=document.getElementById('symbol-input').value.trim().toUpperCase();
   const key=document.getElementById('api-key').value.trim();
-  if(!sym){setStatus('Enter a symbol.');return;}
-  if(!key){setStatus('Enter an API key.');return;}
+  if(!sym||!key){setStatus('Enter symbol and API key.');return;}
   setStatus(`Loading ${sym}…`);
   try{
-    const rows=await fetchDailyData(sym,key);
-    if(!rows.length) throw new Error('No data returned.');
-    const closes=rows.map(r=>r.close);
-    const e20=computeEma(closes,20),e50=computeEma(closes,50),e200=computeEma(closes,200);
+    const rows=await fetchDailyData(sym,key);if(!rows.length)throw new Error('No data.');
+    const closes=rows.map(r=>r.close),e20=computeEma(closes,20),e50=computeEma(closes,50),e200=computeEma(closes,200);
     rows.forEach((r,i)=>{r.ema20=e20[i];r.ema50=e50[i];r.ema200=e200[i];});
-    rawData=rows; currentSym=sym;
-    TIMEFRAMES.forEach(tf=>{
-      const sl=sliceByTf(rawData,tf);
-      chartData[tf]={dates:sl.map(r=>r.date),closes:sl.map(r=>r.close),highs:sl.map(r=>r.high),lows:sl.map(r=>r.low),ema20:sl.map(r=>r.ema20),ema50:sl.map(r=>r.ema50),ema200:sl.map(r=>r.ema200)};
-      markers[tf]=[];
-    });
-    notes=[]; renderNotes();
-    TIMEFRAMES.forEach(tf=>renderChart(tf));
-    setStatus(`Loaded ${sym} — ${rows.length} trading days.`);
+    rawData=rows;currentSym=sym;
+    TIMEFRAMES.forEach(tf=>{const sl=sliceByTf(rawData,tf);chartData[tf]={dates:sl.map(r=>r.date),closes:sl.map(r=>r.close),highs:sl.map(r=>r.high),lows:sl.map(r=>r.low),ema20:sl.map(r=>r.ema20),ema50:sl.map(r=>r.ema50),ema200:sl.map(r=>r.ema200)};markers[tf]=[];});
+    notes=[];renderNotes();TIMEFRAMES.forEach(tf=>renderChart(tf));
+    setStatus(`Loaded ${sym} — ${rows.length} days.`);
   }catch(e){setStatus(`Error: ${e.message}`);}
 }
-
+ 
+// ── Zoom ──────────────────────────────────────────────────────
+function zoomChart(tf,dir){
+  const div=document.getElementById(`chart-${tf}`);if(!div||!div._hasPlot)return;
+  const cd=chartData[tf];if(!cd||!cd.dates.length)return;
+  const l=div._layout||{},xr=(l['xaxis.range']||l.xaxis?.range)||[cd.dates[0],cd.dates[cd.dates.length-1]];
+  const t0=new Date(xr[0]).getTime(),t1=new Date(xr[1]).getTime(),mid=(t0+t1)/2,half=(t1-t0)/2,fac=dir==='in'?0.6:1.65;
+  Plotly.relayout(div,{'xaxis.range':[new Date(mid-half*fac).toISOString().slice(0,10),new Date(mid+half*fac).toISOString().slice(0,10)]});
+}
+function resetZoom(tf){const div=document.getElementById(`chart-${tf}`);if(div&&div._hasPlot)Plotly.relayout(div,{'xaxis.autorange':true,'yaxis.autorange':true});}
+ 
+// ── Tooltip (only tooltip, no Plotly hover) ───────────────────
+function showTooltip(tf,dateStr,price,cx,cy){
+  _ttTf=tf;_ttDate=dateStr;_ttPrice=price;
+  const tt=document.getElementById('hover-tooltip');
+  document.getElementById('tt-date').textContent=dateStr;
+  document.getElementById('tt-price').textContent=`$${price.toFixed(2)}`;
+  const btn=document.getElementById('tt-mark-btn');
+  btn.disabled=!measureMode;btn.style.opacity=measureMode?'1':'0.45';
+  tt.style.display='block';
+  let left=cx+14,top=cy+14;
+  if(left+175>window.innerWidth)left=cx-180;
+  if(top+95>window.innerHeight)top=cy-95;
+  tt.style.left=left+'px';tt.style.top=top+'px';
+}
+function hideTooltip(){document.getElementById('hover-tooltip').style.display='none';}
+function markFromTooltip(){if(measureMode&&_ttTf&&_ttDate){addMarker(_ttTf,_ttDate);hideTooltip();}}
+ 
 // ── Chart rendering ───────────────────────────────────────────
 function activeYArrays(tf){
-  const cd=chartData[tf];
-  if(!cd) return null;
-  if(scaleMode==='pct'){
-    const base=cd.closes[0]||1,pct=v=>(v/base-1)*100;
-    return{close:cd.closes.map(pct),ema20:cd.ema20.map(pct),ema50:cd.ema50.map(pct),ema200:cd.ema200.map(pct),label:'Return (%)'};
-  }
+  const cd=chartData[tf];if(!cd)return null;
+  if(scaleMode==='pct'){const base=cd.closes[0]||1,pct=v=>(v/base-1)*100;return{close:cd.closes.map(pct),ema20:cd.ema20.map(pct),ema50:cd.ema50.map(pct),ema200:cd.ema200.map(pct),label:'Return (%)'};}
   return{close:cd.closes,ema20:cd.ema20,ema50:cd.ema50,ema200:cd.ema200,label:scaleMode==='log'?'Price (log)':'Price'};
 }
-
+ 
 function buildTraces(tf){
-  const cd=chartData[tf];
-  if(!cd||!cd.dates.length) return [];
+  const cd=chartData[tf];if(!cd||!cd.dates.length)return[];
   const ya=activeYArrays(tf);
-  const traces=[{x:cd.dates,y:ya.close,type:'scatter',mode:'lines',name:'Close',line:{color:'#c8d8f0',width:2},hovertemplate:'<b>%{x}</b><br>%{y:.3f}<extra></extra>'}];
-  if(showEma[20]) traces.push({x:cd.dates,y:ya.ema20,type:'scatter',mode:'lines',name:'EMA20',line:{color:'#4e9af1',width:1.5,dash:'dash'},hovertemplate:'EMA20: %{y:.2f}<extra></extra>'});
-  if(showEma[50]) traces.push({x:cd.dates,y:ya.ema50,type:'scatter',mode:'lines',name:'EMA50',line:{color:'#42c97a',width:1.5,dash:'dash'},hovertemplate:'EMA50: %{y:.2f}<extra></extra>'});
-  if(showEma[200]) traces.push({x:cd.dates,y:ya.ema200,type:'scatter',mode:'lines',name:'EMA200',line:{color:'#e94560',width:1.5,dash:'dash'},hovertemplate:'EMA200: %{y:.2f}<extra></extra>'});
+  const traces=[{x:cd.dates,y:ya.close,type:'scatter',mode:'lines',name:'Close',line:{color:'#c8d8f0',width:2},hoverinfo:'none'}];
+  if(showEma[20])traces.push({x:cd.dates,y:ya.ema20,type:'scatter',mode:'lines',name:'EMA20',line:{color:'#4e9af1',width:1.5,dash:'dash'},hoverinfo:'none'});
+  if(showEma[50])traces.push({x:cd.dates,y:ya.ema50,type:'scatter',mode:'lines',name:'EMA50',line:{color:'#42c97a',width:1.5,dash:'dash'},hoverinfo:'none'});
+  if(showEma[200])traces.push({x:cd.dates,y:ya.ema200,type:'scatter',mode:'lines',name:'EMA200',line:{color:'#e94560',width:1.5,dash:'dash'},hoverinfo:'none'});
   return traces;
 }
-
+ 
+// Marker shapes only — no text annotations on chart
 function buildShapes(tf){return markers[tf].map((m,k)=>({type:'line',x0:m.date,x1:m.date,y0:0,y1:1,yref:'paper',line:{color:markerColor(k),width:2}}));}
-
+ 
+// Pair summary annotations only (no date/price labels)
 function buildAnnotations(tf){
-  if(!showLabels) return [];
-  const anns=[],cd=chartData[tf],ms=markers[tf];
-  if(!cd) return anns;
-  ms.forEach((m,k)=>{
-    const idx=cd.dates.indexOf(m.date);if(idx<0) return;
-    const ya=activeYArrays(tf),yval=ya.close[idx];
-    const lbl=scaleMode==='pct'?`${m.date}<br>${yval.toFixed(2)}%`:`${m.date}<br>${yval.toFixed(2)}`;
-    anns.push({x:m.date,y:yval,xanchor:'right',yanchor:'middle',text:lbl,showarrow:false,font:{color:markerColor(k),size:10},bgcolor:'rgba(10,18,40,0.82)',bordercolor:markerColor(k),borderpad:3});
-  });
+  if(!showLabels)return[];
+  const anns=[],cd=chartData[tf],ms=markers[tf];if(!cd)return anns;
   const nPairs=Math.floor(ms.length/2);
   for(let p=0;p<nPairs;p++){
     const m1=ms[2*p],m2=ms[2*p+1];
-    const i1=cd.dates.indexOf(m1.date),i2=cd.dates.indexOf(m2.date);
-    if(i1<0||i2<0) continue;
+    const i1=cd.dates.indexOf(m1.date),i2=cd.dates.indexOf(m2.date);if(i1<0||i2<0)continue;
     const lo=Math.min(i1,i2),hi=Math.max(i1,i2);
     const d=dateDiff(cd.dates[lo],cd.dates[hi]),trd=hi-lo+1;
     const ya=activeYArrays(tf),yMax=Math.max(...ya.close.slice(lo,hi+1));
-    const midDate=cd.dates[Math.floor((lo+hi)/2)];
-    anns.push({x:midDate,y:yMax,xanchor:'center',yanchor:'bottom',text:`Δ${p+1}: ${d.months}M ${d.days}D | ${trd}td`,showarrow:false,yshift:8,font:{color:'#fff',size:10},bgcolor:'rgba(10,18,40,0.8)',bordercolor:'rgba(200,200,200,0.35)',borderpad:3});
+    const pctChg=((cd.closes[hi]-cd.closes[lo])/cd.closes[lo]*100).toFixed(1);
+    const arrow=cd.closes[hi]>=cd.closes[lo]?'▲':'▼';
+    const color=cd.closes[hi]>=cd.closes[lo]?'#2da44e':'#e94560';
+    anns.push({
+      x:cd.dates[Math.floor((lo+hi)/2)],y:yMax,
+      xanchor:'center',yanchor:'bottom',yshift:6,
+      text:`Δ${p+1}: ${d.months}M${d.days}D | ${trd}td | <span style="color:${color}">${arrow}${pctChg}%</span>`,
+      showarrow:false,font:{color:'#e0e6f0',size:10},
+      bgcolor:'rgba(10,18,40,0.88)',bordercolor:'rgba(200,200,200,0.25)',borderpad:3,
+    });
   }
   return anns;
 }
-
+ 
+// Marker legend below chart (replaces on-chart labels)
+function renderMarkerLegend(tf){
+  const el=document.getElementById(`legend-${tf}`);if(!el)return;
+  const cd=chartData[tf],ms=markers[tf];
+  if(!cd||!ms.length){el.innerHTML='';return;}
+  const nPairs=Math.floor(ms.length/2);
+  const unpaired=ms.length%2===1;
+  let html='';
+  // Individual marker chips
+  ms.forEach((m,k)=>{
+    const col=markerColor(k);
+    const pairN=Math.floor(k/2)+1;
+    const role=k%2===0?'A':'B';
+    html+=`<span class="marker-chip" style="color:${col};border-color:${col}40;background:${col}12">M${k+1}·Δ${pairN}${role}: ${m.date} $${m.price.toFixed(2)}</span>`;
+  });
+  // Pair summary rows
+  if(nPairs>0){
+    html+='<div style="width:100%;height:1px;background:#1e2f50;margin:3px 0"></div>';
+    for(let p=0;p<nPairs;p++){
+      const m1=ms[2*p],m2=ms[2*p+1];
+      const i1=cd.dates.indexOf(m1.date),i2=cd.dates.indexOf(m2.date);
+      if(i1<0||i2<0)continue;
+      const lo=Math.min(i1,i2),hi=Math.max(i1,i2);
+      const d=dateDiff(cd.dates[lo],cd.dates[hi]);
+      const pct=((cd.closes[hi]-cd.closes[lo])/cd.closes[lo]*100).toFixed(2);
+      const up=cd.closes[hi]>=cd.closes[lo];
+      html+=`<span class="pair-row">Δ${p+1}: ${d.months}M ${d.days}D | ${hi-lo+1} trading days | <span style="color:${up?'#2da44e':'#e94560'};font-weight:700">${up?'▲':'▼'}${pct}%</span> | $${cd.closes[lo].toFixed(2)} → $${cd.closes[hi].toFixed(2)}</span>`;
+    }
+  }
+  el.innerHTML=html;
+}
+ 
 function buildLayout(tf){
   const ya=activeYArrays(tf)||{label:'Price'};
-  return{paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'#0c1526',font:{color:'#c0cce0',size:11},margin:{l:58,r:16,t:8,b:44},height:300,
+  return{
+    paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'#0c1526',
+    font:{color:'#c0cce0',size:11},margin:{l:52,r:14,t:6,b:36},autosize:true,
     xaxis:{type:'date',gridcolor:'#192840',tickfont:{color:'#6a80a8'},linecolor:'#2a3f6a',rangeslider:{visible:false}},
-    yaxis:{type:scaleMode==='log'?'log':'linear',title:{text:ya.label,font:{size:11,color:'#6a80a8'}},gridcolor:'#192840',tickfont:{color:'#6a80a8'},linecolor:'#2a3f6a',autorange:true},
+    yaxis:{type:scaleMode==='log'?'log':'linear',title:{text:ya.label,font:{size:10,color:'#6a80a8'}},gridcolor:'#192840',tickfont:{color:'#6a80a8'},linecolor:'#2a3f6a',autorange:true},
     legend:{orientation:'h',y:-0.16,x:0,font:{size:10},bgcolor:'rgba(0,0,0,0)'},
-    shapes:buildShapes(tf),annotations:buildAnnotations(tf)};
+    shapes:buildShapes(tf),annotations:buildAnnotations(tf),
+    hovermode:false,  // ← Plotly hover completely disabled
+  };
 }
-
+ 
+function attachListeners(div,tf){
+  // Use mouse events on the SVG drag layer for full-area interaction
+  const getPlotCoords=(evt)=>{
+    const bb=div.getBoundingClientRect();
+    const layout=div._fullLayout;
+    if(!layout)return null;
+    const xaxis=layout.xaxis,yaxis=layout.yaxis;
+    const plotLeft=bb.left+layout.margin.l,plotRight=bb.left+layout.width-layout.margin.r;
+    const plotTop=bb.top+layout.margin.t,plotBottom=bb.top+layout.height-layout.margin.b;
+    const px=evt.clientX,py=evt.clientY;
+    if(px<plotLeft||px>plotRight||py<plotTop||py>plotBottom)return null;
+    // Convert pixel → data
+    const frac=(px-plotLeft)/(plotRight-plotLeft);
+    const xRange=xaxis.range;
+    const t0=new Date(xRange[0]).getTime(),t1=new Date(xRange[1]).getTime();
+    const tMs=t0+(t1-t0)*frac;
+    const dateStr=new Date(tMs).toISOString().slice(0,10);
+    const cd=chartData[tf];
+    const idx=closestDateIdx(cd.dates,dateStr);
+    if(idx<0)return null;
+    return{date:cd.dates[idx],price:cd.closes[idx],clientX:evt.clientX,clientY:evt.clientY};
+  };
+ 
+  div.addEventListener('mousemove',evt=>{
+    const pt=getPlotCoords(evt);
+    if(pt)showTooltip(tf,pt.date,pt.price,pt.clientX,pt.clientY);
+    else hideTooltip();
+  });
+ 
+  div.addEventListener('click',evt=>{
+    const pt=getPlotCoords(evt);
+    if(!pt)return;
+    if(measureMode){addMarker(tf,pt.date);}
+    else{showTooltip(tf,pt.date,pt.price,pt.clientX,pt.clientY);}
+  });
+ 
+  div.addEventListener('mouseleave',()=>{ /* keep tooltip visible for button click */ });
+  div.on('plotly_relayout',l=>{div._layout=l;});
+}
+ 
 function renderChart(tf){
-  const div=document.getElementById(`chart-${tf}`);
-  if(!div) return;
+  const div=document.getElementById(`chart-${tf}`);if(!div)return;
   const cd=chartData[tf];
-  if(!cd||!cd.dates.length){div._hasPlot&&Plotly.purge(div);div.innerHTML='<div style="color:#4a5e80;padding:24px;text-align:center;font-size:13px">No data loaded</div>';div._hasPlot=false;return;}
+  if(!cd||!cd.dates.length){
+    if(div._hasPlot)Plotly.purge(div);
+    div.innerHTML='<div style="color:#4a5e80;padding:20px;text-align:center;font-size:12px">No data loaded</div>';
+    div._hasPlot=false;renderMarkerLegend(tf);return;
+  }
   const traces=buildTraces(tf),layout=buildLayout(tf),cfg={responsive:true,displayModeBar:false};
   if(div._hasPlot){Plotly.react(div,traces,layout,cfg);}
-  else{Plotly.newPlot(div,traces,layout,cfg);div._hasPlot=true;div.on('plotly_click',data=>handleChartClick(tf,data));}
+  else{Plotly.newPlot(div,traces,layout,cfg);div._hasPlot=true;attachListeners(div,tf);}
+  renderMarkerLegend(tf);
 }
-
+ 
 function updateMarkerOverlay(tf){
   const div=document.getElementById(`chart-${tf}`);
-  if(!div||!div._hasPlot) return;
+  if(!div||!div._hasPlot)return;
   Plotly.relayout(div,{shapes:buildShapes(tf),annotations:buildAnnotations(tf)});
+  renderMarkerLegend(tf);
 }
-
 function rerenderAll(){TIMEFRAMES.forEach(tf=>renderChart(tf));}
-
+ 
 // ── Markers ───────────────────────────────────────────────────
-function handleChartClick(tf,data){
-  if(!measureMode) return;
-  if(markers[tf].length>=MAX_MARKERS){setStatus(`${tf}: max markers (${MAX_MARKERS}) reached.`);return;}
-  if(!data.points||!data.points.length) return;
-  const pt=data.points[0];
-  addMarker(tf,(typeof pt.x==='string'?pt.x:pt.x).slice(0,10));
-}
-
-function closestDateIdx(dates,target){
-  const t=target.slice(0,10);let best=-1,bestDiff=Infinity;
-  dates.forEach((d,i)=>{const diff=Math.abs(Date.parse(d)-Date.parse(t));if(diff<bestDiff){bestDiff=diff;best=i;}});
-  return best;
-}
-
 function addMarker(tf,dateStr){
-  const cd=chartData[tf];if(!cd) return;
-  const idx=closestDateIdx(cd.dates,dateStr);if(idx<0) return;
+  const cd=chartData[tf];if(!cd)return;
+  const idx=closestDateIdx(cd.dates,dateStr);if(idx<0)return;
   const date=cd.dates[idx];
-  if(markers[tf].find(m=>m.date===date)) return;
+  if(markers[tf].find(m=>m.date===date))return;
+  if(markers[tf].length>=MAX_MARKERS){setStatus(`${tf}: max markers.`);return;}
   markers[tf].push({date,price:cd.closes[idx],idx});
   updateMarkerOverlay(tf);
   const n=markers[tf].length;
   if(n%2===0){const pi=n/2-1;recordPairNote(tf,pi+1,markers[tf][2*pi],markers[tf][2*pi+1],cd);}
-  setStatus(`Marker placed on ${tf}: ${date} @ ${cd.closes[idx].toFixed(2)}`);
+  setStatus(`Marker: ${date} @ $${cd.closes[idx].toFixed(2)}`);
 }
-
 function deleteLastMarker(tf){
-  const ms=markers[tf];if(!ms.length) return;
-  const n=ms.length;
-  if(n%2===0) removePairNote(tf,n/2);
-  ms.pop();updateMarkerOverlay(tf);setStatus(`Last marker removed from ${tf}.`);
+  const ms=markers[tf];if(!ms.length)return;
+  if(ms.length%2===0)removePairNote(tf,ms.length/2);
+  ms.pop();updateMarkerOverlay(tf);
 }
-
-function clearMarkers(tf){
-  notes=notes.filter(n=>n._tf!==tf);markers[tf]=[];updateMarkerOverlay(tf);renderNotes();setStatus(`Markers cleared on ${tf}.`);
-}
-
+function clearMarkers(tf){notes=notes.filter(n=>n._tf!==tf);markers[tf]=[];updateMarkerOverlay(tf);renderNotes();}
 function clearAllMarkers(){TIMEFRAMES.forEach(tf=>clearMarkers(tf));setStatus('All markers cleared.');}
-
-// ── Copy markers ──────────────────────────────────────────────
-function copyMarkers(srcTf,destTf,clearFirst){
-  if(srcTf===destTf) return 0;
-  const srcDates=markers[srcTf].map(m=>m.date);
-  if(!srcDates.length){setStatus(`No markers on ${srcTf}.`);return 0;}
-  if(clearFirst) clearMarkers(destTf);
-  const cd=chartData[destTf];if(!cd||!cd.dates.length){setStatus(`No data on ${destTf}.`);return 0;}
+ 
+function copyMarkers(src,dest,clr){
+  if(src===dest)return 0;const sd=markers[src].map(m=>m.date);if(!sd.length)return 0;
+  if(clr)clearMarkers(dest);
+  const cd=chartData[dest];if(!cd||!cd.dates.length)return 0;
   const dMin=cd.dates[0],dMax=cd.dates[cd.dates.length-1];let added=0;
-  for(const d of srcDates){
-    if(markers[destTf].length>=MAX_MARKERS) break;
-    if(d<dMin||d>dMax) continue;
-    const idx=closestDateIdx(cd.dates,d);if(idx<0) continue;
-    const actualDate=cd.dates[idx];
-    if(markers[destTf].find(m=>m.date===actualDate)) continue;
-    markers[destTf].push({date:actualDate,price:cd.closes[idx],idx});
-    const n=markers[destTf].length;
-    if(n%2===0){const pi=n/2-1;recordPairNote(destTf,pi+1,markers[destTf][2*pi],markers[destTf][2*pi+1],cd);}
+  for(const d of sd){
+    if(markers[dest].length>=MAX_MARKERS)break;if(d<dMin||d>dMax)continue;
+    const idx=closestDateIdx(cd.dates,d);if(idx<0)continue;const actual=cd.dates[idx];
+    if(markers[dest].find(m=>m.date===actual))continue;
+    markers[dest].push({date:actual,price:cd.closes[idx],idx});
+    const n=markers[dest].length;if(n%2===0){const pi=n/2-1;recordPairNote(dest,pi+1,markers[dest][2*pi],markers[dest][2*pi+1],cd);}
     added++;
   }
-  updateMarkerOverlay(destTf);return added;
+  updateMarkerOverlay(dest);return added;
 }
-
-function copyToAll(srcTf,clearFirst){
-  let total=0;TIMEFRAMES.forEach(tf=>{if(tf!==srcTf) total+=copyMarkers(srcTf,tf,clearFirst);});
-  setStatus(`Copied from ${srcTf} → ALL (${total} marker(s) placed).`);
-}
-
-function panelCopy(srcTf){
-  const dest=document.getElementById(`dest-${srcTf}`).value;
-  const clear=document.getElementById(`clr-${srcTf}`).checked;
-  const n=copyMarkers(srcTf,dest,clear);
-  setStatus(`Copied ${n} marker(s) from ${srcTf} → ${dest}.`);
-}
-
-function panelCopyAll(srcTf){
-  copyToAll(srcTf,document.getElementById(`clr-${srcTf}`).checked);
-}
-
-// ── Notes ─────────────────────────────────────────────────────
+function panelCopy(src){const n=copyMarkers(src,document.getElementById(`dest-${src}`).value,document.getElementById(`clr-${src}`).checked);setStatus(`Copied ${n} from ${src}.`);}
+function panelCopyAll(src){let t=0;TIMEFRAMES.forEach(tf=>{if(tf!==src)t+=copyMarkers(src,tf,document.getElementById(`clr-${src}`).checked);});setStatus(`Copied → ALL (${t})`);}
+ 
+// ── Notes / DB ────────────────────────────────────────────────
 async function recordPairNote(tf,pairNum,m1,m2,cd){
-  const i1=cd.dates.indexOf(m1.date),i2=cd.dates.indexOf(m2.date);
-  if(i1<0||i2<0) return;
+  const i1=cd.dates.indexOf(m1.date),i2=cd.dates.indexOf(m2.date);if(i1<0||i2<0)return;
   const lo=Math.min(i1,i2),hi=Math.max(i1,i2);
   const d=dateDiff(cd.dates[lo],cd.dates[hi]);
   const p1=cd.closes[lo],p2=cd.closes[hi];
-  const pctChg=((p2-p1)/p1*100).toFixed(2);
-
-  const note={
-    symbol:currentSym, timeframe:tf, pair_num:pairNum,
-    date1:cd.dates[lo], price1:p1.toFixed(4),
-    date2:cd.dates[hi], price2:p2.toFixed(4),
-    months:d.months, days:d.days, trading_days:hi-lo+1,
-    pctChg, _tf:tf, _pair:pairNum, dbId:null, dbPending:true,
-  };
-  notes.push(note);
-  renderNotes();
-
-  // Send to DB
-  const id=await sendToDb({
-    table:'marker_pairs',
-    symbol:currentSym, timeframe:tf, pair_num:pairNum,
-    date1:cd.dates[lo], price1:parseFloat(p1.toFixed(4)),
-    date2:cd.dates[hi], price2:parseFloat(p2.toFixed(4)),
-    months:d.months, days:d.days, trading_days:hi-lo+1,
-  });
-  note.dbId=id; note.dbPending=false;
-  renderNotes();
+  const note={symbol:currentSym,timeframe:tf,pair_num:pairNum,date1:cd.dates[lo],price1:p1.toFixed(4),date2:cd.dates[hi],price2:p2.toFixed(4),months:d.months,days:d.days,trading_days:hi-lo+1,pctChg:((p2-p1)/p1*100).toFixed(2),_tf:tf,_pair:pairNum,dbId:null,dbPending:true};
+  notes.push(note);renderNotes();
+  const id=await sendToDb({table:'marker_pairs',symbol:currentSym,timeframe:tf,pair_num:pairNum,date1:cd.dates[lo],price1:parseFloat(p1.toFixed(4)),date2:cd.dates[hi],price2:parseFloat(p2.toFixed(4)),months:d.months,days:d.days,trading_days:hi-lo+1});
+  note.dbId=id;note.dbPending=false;renderNotes();
 }
-
-function removePairNote(tf,pairNum){
-  for(let i=notes.length-1;i>=0;i--){if(notes[i]._tf===tf&&notes[i]._pair===pairNum){notes.splice(i,1);break;}}
-  renderNotes();
-}
-
-function dbCell(note){
-  if(note.dbPending) return '<span style="color:#f0a030">⏳</span>';
-  if(note.dbId)      return `<span style="color:#2da44e" title="DB id ${note.dbId}">✓ ${note.dbId}</span>`;
-  return dbEndpoint ? '<span style="color:#e94560" title="Failed to save">✗</span>' : '<span style="color:#3a4f70">—</span>';
-}
-
+function removePairNote(tf,n){for(let i=notes.length-1;i>=0;i--){if(notes[i]._tf===tf&&notes[i]._pair===n){notes.splice(i,1);break;}}renderNotes();}
+function dbCell(n){if(n.dbPending)return'<span style="color:#f0a030">⏳</span>';if(n.dbId)return`<span style="color:#2da44e">✓${n.dbId}</span>`;return dbEndpoint?'<span style="color:#e94560">✗</span>':'—';}
 function renderNotes(){
-  document.getElementById('notes-body').innerHTML=notes.map(n=>`
-    <tr>
-      <td>${n.symbol}</td><td>${n.date1}</td><td>${n.price1}</td>
-      <td>${n.date2}</td><td>${n.price2}</td>
-      <td style="color:${parseFloat(n.pctChg)>=0?'#2da44e':'#e94560'}">${n.pctChg}%</td>
-      <td>${n.months}</td><td>${n.days}</td><td>${n.trading_days}</td>
-      <td>${n.timeframe}</td><td>Δ${n._pair}</td>
-      <td>${dbCell(n)}</td>
-    </tr>`).join('');
+  document.getElementById('notes-body').innerHTML=notes.map(n=>`<tr><td>${n.symbol}</td><td>${n.date1}</td><td>${n.price1}</td><td>${n.date2}</td><td>${n.price2}</td><td style="color:${parseFloat(n.pctChg)>=0?'#2da44e':'#e94560'}">${n.pctChg}%</td><td>${n.months}</td><td>${n.days}</td><td>${n.trading_days}</td><td>${n.timeframe}</td><td>Δ${n._pair}</td><td>${dbCell(n)}</td></tr>`).join('');
 }
-
 function exportNotes(){
   if(!notes.length){alert('No notes yet.');return;}
-  const hdrs=['Symbol','Date 1','Price 1','Date 2','Price 2','Change %','Months','Days','Trading Days','Timeframe','Pair','DB ID'];
-  const rows=notes.map(n=>[n.symbol,n.date1,n.price1,n.date2,n.price2,n.pctChg,n.months,n.days,n.trading_days,n.timeframe,`Δ${n._pair}`,n.dbId||'']);
-  downloadCsv(hdrs,rows,`notes_${currentSym}_${stamp()}.csv`);
+  downloadCsv(['Sym','Date1','P1','Date2','P2','Chg%','Mo','Days','Trd','TF','Pair','DB'],notes.map(n=>[n.symbol,n.date1,n.price1,n.date2,n.price2,n.pctChg,n.months,n.days,n.trading_days,n.timeframe,`Δ${n._pair}`,n.dbId||'']),`notes_${currentSym}_${stamp()}.csv`);
 }
-
+ 
 // ── Predictions ───────────────────────────────────────────────
-function openPredict(){
-  const sym=(document.getElementById('symbol-input').value.trim()||currentSym).toUpperCase();
-  document.getElementById('pd-symbol').value=sym;
+function openPredictDialog(sym){
+  document.getElementById('pd-symbol').value=sym||(currentSym||'');
   const tmr=new Date();tmr.setDate(tmr.getDate()+1);
   document.getElementById('pd-date').value=tmr.toISOString().slice(0,10);
-  document.getElementById('pd-price').value='';
-  document.getElementById('pd-notes').value='';
+  document.getElementById('pd-price').value='';document.getElementById('pd-notes').value='';
   document.getElementById('predict-dialog').showModal();
 }
-
+function openPredict(){_predictCallback=null;openPredictDialog(document.getElementById('symbol-input').value.trim().toUpperCase()||currentSym);}
 async function savePrediction(){
   const raw=parseFloat(document.getElementById('pd-price').value);
-  const pred={
-    symbol:document.getElementById('pd-symbol').value.trim().toUpperCase(),
-    createdAt:new Date().toISOString().slice(0,16).replace('T',' '),
-    nextDate:document.getElementById('pd-date').value,
-    priceTarget:isNaN(raw)?'—':raw.toFixed(4),
-    notes:document.getElementById('pd-notes').value.trim(),
-    dbId:null, dbPending:true,
-  };
-  predictions.push(pred);
-  renderPredictions();
+  const pred={symbol:document.getElementById('pd-symbol').value.trim().toUpperCase(),createdAt:new Date().toISOString().slice(0,16).replace('T',' '),nextDate:document.getElementById('pd-date').value,priceTarget:isNaN(raw)?'—':raw.toFixed(4),notes:document.getElementById('pd-notes').value.trim(),dbId:null,dbPending:true};
+  predictions.push(pred);renderPredictions();
   document.getElementById('predict-dialog').close();
-
-  const id=await sendToDb({
-    table:'price_predictions',
-    symbol:pred.symbol,
-    next_move_date:pred.nextDate,
-    price_target:parseFloat(pred.priceTarget)||0,
-    notes:pred.notes,
-  });
-  pred.dbId=id; pred.dbPending=false;
-  renderPredictions();
-  setStatus('Prediction saved.');
+  const cb=_predictCallback;_predictCallback=null;if(cb)cb();
+  const id=await sendToDb({table:'price_predictions',symbol:pred.symbol,next_move_date:pred.nextDate,price_target:parseFloat(pred.priceTarget)||0,notes:pred.notes});
+  pred.dbId=id;pred.dbPending=false;renderPredictions();
 }
-
+function skipPrediction(){document.getElementById('predict-dialog').close();const cb=_predictCallback;_predictCallback=null;if(cb)cb();}
 function renderPredictions(){
-  document.getElementById('pred-body').innerHTML=predictions.map(p=>`
-    <tr>
-      <td>${p.symbol}</td><td>${p.createdAt}</td><td>${p.nextDate}</td>
-      <td>$${p.priceTarget}</td>
-      <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${p.notes}">${p.notes||'—'}</td>
-      <td>${p.dbId?`<span style="color:#2da44e">✓ ${p.dbId}</span>`:p.dbPending?'<span style="color:#f0a030">⏳</span>':dbEndpoint?'<span style="color:#e94560">✗</span>':'<span style="color:#3a4f70">—</span>'}</td>
-    </tr>`).join('');
+  document.getElementById('pred-body').innerHTML=predictions.map(p=>`<tr><td>${p.symbol}</td><td>${p.createdAt}</td><td>${p.nextDate}</td><td>$${p.priceTarget}</td><td style="max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.notes||'—'}</td><td>${p.dbId?`<span style="color:#2da44e">✓${p.dbId}</span>`:p.dbPending?'⏳':dbEndpoint?'<span style="color:#e94560">✗</span>':'—'}</td></tr>`).join('');
 }
-
 function exportPredictions(){
   if(!predictions.length){alert('No predictions yet.');return;}
-  const hdrs=['Symbol','Created At','Next Move Date','Price Target','Notes','DB ID'];
-  const rows=predictions.map(p=>[p.symbol,p.createdAt,p.nextDate,p.priceTarget,p.notes,p.dbId||'']);
-  downloadCsv(hdrs,rows,`predictions_${currentSym}_${stamp()}.csv`);
+  downloadCsv(['Sym','Created','Next','Target','Notes','DB'],predictions.map(p=>[p.symbol,p.createdAt,p.nextDate,p.priceTarget,p.notes,p.dbId||'']),`preds_${currentSym}_${stamp()}.csv`);
 }
-
-// ── Symbol search ─────────────────────────────────────────────
-function openSearch(){
-  document.getElementById('search-input').value=document.getElementById('symbol-input').value;
-  document.getElementById('search-body').innerHTML='';_searchResults=[];_selectedRow=-1;
-  document.getElementById('search-dialog').showModal();
-}
-
+ 
+// ── Search ────────────────────────────────────────────────────
+function openSearch(){document.getElementById('search-input').value=document.getElementById('symbol-input').value;document.getElementById('search-body').innerHTML='';_searchResults=[];_selectedRow=-1;document.getElementById('search-dialog').showModal();}
 async function doSearch(){
-  const term=document.getElementById('search-input').value.trim();
-  const key=document.getElementById('api-key').value.trim();
-  if(!term||!key) return;
+  const term=document.getElementById('search-input').value.trim(),key=document.getElementById('api-key').value.trim();if(!term||!key)return;
   document.getElementById('search-body').innerHTML='<tr><td colspan="4" style="color:#6a80a8;padding:10px">Searching…</td></tr>';
-  try{
-    _searchResults=await fetchSearch(term,key);_selectedRow=-1;
-    document.getElementById('search-body').innerHTML=_searchResults.length
-      ?_searchResults.map((r,i)=>`<tr id="sr-${i}" onclick="pickRow(${i})"><td>${r.symbol}</td><td>${r.name}</td><td>${r.type}</td><td>${r.region}</td></tr>`).join('')
-      :'<tr><td colspan="4" style="color:#6a80a8;padding:10px">No results.</td></tr>';
-  }catch(e){document.getElementById('search-body').innerHTML=`<tr><td colspan="4" style="color:#e94560;padding:10px">Error: ${e.message}</td></tr>`;}
+  try{_searchResults=await fetchSearch(term,key);_selectedRow=-1;document.getElementById('search-body').innerHTML=_searchResults.length?_searchResults.map((r,i)=>`<tr id="sr-${i}" onclick="pickRow(${i})"><td>${r.symbol}</td><td>${r.name}</td><td>${r.type}</td><td>${r.region}</td></tr>`).join(''):'<tr><td colspan="4" style="color:#6a80a8;padding:10px">No results.</td></tr>';}
+  catch(e){document.getElementById('search-body').innerHTML=`<tr><td colspan="4" style="color:#e94560;padding:10px">Error: ${e.message}</td></tr>`;}
 }
-
-function pickRow(i){
-  if(_selectedRow>=0){const p=document.getElementById(`sr-${_selectedRow}`);if(p)p.classList.remove('selected');}
-  _selectedRow=i;const row=document.getElementById(`sr-${i}`);if(row)row.classList.add('selected');
-}
-
-function applySearchResult(){
-  if(_selectedRow<0||!_searchResults.length) return;
-  const r=_searchResults[_selectedRow];
-  if(r){document.getElementById('symbol-input').value=r.symbol;document.getElementById('search-dialog').close();loadSymbol();}
-}
-
+function pickRow(i){if(_selectedRow>=0){const p=document.getElementById(`sr-${_selectedRow}`);if(p)p.classList.remove('selected');}_selectedRow=i;const r=document.getElementById(`sr-${i}`);if(r)r.classList.add('selected');}
+function applySearchResult(){if(_selectedRow<0||!_searchResults.length)return;const r=_searchResults[_selectedRow];if(r){document.getElementById('symbol-input').value=r.symbol;document.getElementById('search-dialog').close();loadSymbol();}}
+ 
 // ── Toggles ───────────────────────────────────────────────────
-function toggleMeasure(on){measureMode=on;document.body.classList.toggle('measure-on',on);}
+function toggleMeasure(on){measureMode=on;document.body.classList.toggle('measure-on',on);setStatus(on?'Measure ON — click chart to place markers':'Measure OFF — hover to inspect');}
 function toggleLabels(on){showLabels=on;TIMEFRAMES.forEach(tf=>updateMarkerOverlay(tf));}
 function changeScale(val){scaleMode=val;rerenderAll();}
 function toggleEma(n,on){showEma[n]=on;rerenderAll();}
-
-// ── CSV ───────────────────────────────────────────────────────
-function downloadCsv(headers,rows,filename){
-  const esc=v=>`"${String(v).replace(/"/g,'""')}"`;
-  const csv=[headers.map(esc),...rows.map(r=>r.map(esc))].map(r=>r.join(',')).join('\n');
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-  a.download=filename;a.click();URL.revokeObjectURL(a.href);
-}
+ 
+// ── Utils ─────────────────────────────────────────────────────
+function downloadCsv(h,r,fn){const e=v=>`"${String(v).replace(/"/g,'""')}"`;const c=[h.map(e),...r.map(row=>row.map(e))].map(row=>row.join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([c],{type:'text/csv'}));a.download=fn;a.click();URL.revokeObjectURL(a.href);}
 function stamp(){return new Date().toISOString().slice(0,19).replace(/[T:]/g,'-');}
-
+ 
 // ── Build panels ──────────────────────────────────────────────
 function buildPanels(){
   const col=document.getElementById('charts-col');col.innerHTML='';
   TIMEFRAMES.forEach(tf=>{
-    const destOptions=TIMEFRAMES.filter(t=>t!==tf).map(t=>`<option>${t}</option>`).join('');
-    const div=document.createElement('div');div.className='chart-panel';
-    div.innerHTML=`
-      <div class="chart-title">${tf}</div>
-      <div id="chart-${tf}" style="width:100%;height:300px;"></div>
+    const destOpts=TIMEFRAMES.filter(t=>t!==tf).map(t=>`<option>${t}</option>`).join('');
+    const wrap=document.createElement('div');wrap.className='chart-panel';
+    wrap.innerHTML=`
+      <div class="chart-title">
+        <span>${tf}</span>
+        <button class="zoom-btn" onclick="zoomChart('${tf}','in')">+</button>
+        <button class="zoom-btn" onclick="zoomChart('${tf}','out')">−</button>
+        <button class="zoom-btn" onclick="resetZoom('${tf}')" style="font-size:10px;padding:2px 5px">↺</button>
+      </div>
+      <div id="chart-${tf}" class="chart-wrap" style="cursor:crosshair"></div>
+      <div id="legend-${tf}" class="marker-legend"></div>
       <div class="chart-footer">
-        <button class="sm" onclick="deleteLastMarker('${tf}')">Delete last</button>
-        <button class="sm" onclick="clearMarkers('${tf}')">Clear markers</button>
+        <button class="sm" onclick="deleteLastMarker('${tf}')">Del last</button>
+        <button class="sm" onclick="clearMarkers('${tf}')">Clear</button>
         <span style="flex:1"></span>
-        <label style="font-size:11px"><input type="checkbox" id="clr-${tf}"> Clear dest first</label>
-        <span style="font-size:11px;color:#6a80a8">Copy to:</span>
-        <select id="dest-${tf}" style="width:72px;font-size:11px;padding:2px 4px">${destOptions}</select>
-        <button class="sm" onclick="panelCopy('${tf}')">Copy markers</button>
-        <button class="sm" onclick="panelCopyAll('${tf}')">Copy to ALL</button>
+        <label style="font-size:10px"><input type="checkbox" id="clr-${tf}"> Clear dest</label>
+        <select id="dest-${tf}" style="width:62px;font-size:10px;padding:1px 3px">${destOpts}</select>
+        <button class="sm" onclick="panelCopy('${tf}')">Copy</button>
+        <button class="sm" onclick="panelCopyAll('${tf}')">All</button>
       </div>`;
-    col.appendChild(div);
+    col.appendChild(wrap);
   });
 }
-
+ 
+// close tooltip on outside click
+document.addEventListener('click',e=>{const tt=document.getElementById('hover-tooltip');if(tt.style.display!=='none'&&!tt.contains(e.target))hideTooltip();},true);
+ 
 buildPanels();
-// Auto-connect to hardcoded DB endpoint on load
-document.getElementById('db-endpoint').value = 'https://stock-api-production-1fbd.up.railway.app';
+document.getElementById('db-endpoint').value='https://stock-api-production-1fbd.up.railway.app';
 testEndpoint();
 </script>
 </body>
