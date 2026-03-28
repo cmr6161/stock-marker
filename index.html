@@ -22,6 +22,7 @@ body { font-family: system-ui, -apple-system, sans-serif; background: #12192b; c
 .chart-panel { background: #1a2540; border: 1px solid #2a3f6a; border-radius: 7px; padding: 6px 8px 5px; }
 .chart-title { font-weight: 700; font-size: 12px; color: #e94560; margin-bottom: 3px; display: flex; align-items: center; gap: 6px; }
 .chart-wrap { width: 100%; touch-action: none; }
+.chart-wrap .nsewdrag, .chart-wrap .drag, .chart-wrap .plotly { cursor: crosshair !important; }
 .chart-footer { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-top: 4px; font-size: 11px; }
 
 /* Marker legend */
@@ -103,18 +104,58 @@ body.measure-on #measure-chk-lbl{color:#e94560;font-weight:700;}
   <span class="logo">📈 StockMarker</span>
   <div class="tb-sep"></div>
   <span class="tb-label">Sector</span>
-  <select id="sector-sel" onchange="onSectorChange()" style="width:110px">
+  <select id="sector-sel" onchange="onSectorChange()" style="width:130px">
     <option value="">— sector —</option>
     <option value="tech">Technology</option>
+    <option value="semiconductors">Semiconductors</option>
+    <option value="software">Software</option>
     <option value="finance">Finance</option>
+    <option value="banks">Banks</option>
+    <option value="insurance">Insurance</option>
     <option value="healthcare">Healthcare</option>
+    <option value="biotech">Biotech</option>
+    <option value="pharma">Pharma</option>
+    <option value="meddevices">Medical Devices</option>
     <option value="energy">Energy</option>
-    <option value="consumer">Consumer</option>
+    <option value="oilgas">Oil &amp; Gas E&amp;P</option>
+    <option value="oilservices">Oil Services</option>
+    <option value="renewables">Renewables</option>
+    <option value="consumer_disc">Consumer Discret.</option>
+    <option value="consumer_staples">Consumer Staples</option>
+    <option value="retail">Retail</option>
+    <option value="luxury">Luxury &amp; Apparel</option>
+    <option value="food_bev">Food &amp; Beverage</option>
+    <option value="restaurants">Restaurants</option>
     <option value="industrials">Industrials</option>
+    <option value="defense">Defense &amp; Aero</option>
+    <option value="transport">Transportation</option>
     <option value="utilities">Utilities</option>
     <option value="realestate">Real Estate</option>
     <option value="materials">Materials</option>
+    <option value="mining">Mining &amp; Metals</option>
+    <option value="chemicals">Chemicals</option>
+    <option value="communication">Communication Svcs</option>
+    <option value="media">Media &amp; Entertain.</option>
+    <option value="telecom">Telecom</option>
     <option value="crypto">Crypto-related</option>
+    <option value="fintech">Fintech</option>
+    <option value="cybersecurity">Cybersecurity</option>
+    <option value="cloud">Cloud &amp; SaaS</option>
+    <option value="ai">AI &amp; Machine Learning</option>
+    <option value="ev">EV &amp; Autonomous</option>
+    <option value="gaming">Gaming</option>
+    <option value="cannabis">Cannabis</option>
+    <option value="spacs_ipo">Recent IPOs</option>
+    <option value="dividends">Dividend Aristoc.</option>
+    <option value="china_adr">China ADRs</option>
+    <option value="india">India ADRs</option>
+    <option value="latin_america">Latin America</option>
+    <option value="japan">Japan ADRs</option>
+    <option value="etfs_broad">ETFs — Broad Mkt</option>
+    <option value="etfs_sector">ETFs — Sector</option>
+    <option value="etfs_bond">ETFs — Bonds</option>
+    <option value="etfs_commodity">ETFs — Commodity</option>
+    <option value="etfs_intl">ETFs — Int'l</option>
   </select>
   <select id="ticker-sel" onchange="onTickerSelect()" style="display:none;width:88px"></select>
   <div class="tb-sep"></div>
@@ -129,6 +170,16 @@ body.measure-on #measure-chk-lbl{color:#e94560;font-weight:700;}
   <div class="tb-sep"></div>
   <label id="measure-chk-lbl"><input type="checkbox" id="measure-chk" onchange="toggleMeasure(this.checked)"> Measure</label>
   <label><input type="checkbox" id="labels-chk" checked onchange="toggleLabels(this.checked)"> Labels</label>
+  <div class="tb-sep"></div>
+  <span class="tb-label">All Charts</span>
+  <button class="zoom-btn" onclick="zoomAll('in')" title="Zoom in all">+</button>
+  <button class="zoom-btn" onclick="zoomAll('out')" title="Zoom out all">−</button>
+  <button class="zoom-btn" onclick="resetAll()" title="Reset all" style="font-size:10px;padding:2px 5px">↺</button>
+  <select id="align-src" style="width:62px;font-size:10px;padding:1px 3px">
+    <option value="3M">3M</option><option value="6M">6M</option><option value="YTD">YTD</option>
+    <option value="1Y" selected>1Y</option><option value="2Y">2Y</option><option value="3Y">3Y</option><option value="5Y">5Y</option>
+  </select>
+  <button class="sm accent" onclick="alignAllCharts()">Align</button>
   <div class="tb-sep"></div>
   <select id="scale-sel" onchange="changeScale(this.value)" style="width:78px">
     <option value="price">Price</option><option value="log">Log</option><option value="pct">% Change</option>
@@ -218,7 +269,59 @@ body.measure-on #measure-chk-lbl{color:#e94560;font-weight:700;}
 
 <script>
 'use strict';
-const SECTORS={tech:['AAPL','MSFT','NVDA','GOOGL','META','AMZN','TSM','AVGO','ORCL','CRM','AMD','INTC','QCOM','TXN','MU','ADBE','NOW','SNOW','PLTR','NET'],finance:['JPM','BAC','GS','MS','WFC','V','MA','AXP','C','BLK','SCHW','USB','PNC','TFC','COF','ICE','CME','SPGI','MCO','BX'],healthcare:['UNH','JNJ','LLY','ABBV','MRK','TMO','ABT','DHR','BMY','AMGN','PFE','CVS','CI','HUM','MDT','BSX','SYK','ISRG','VRTX','REGN'],energy:['XOM','CVX','COP','EOG','SLB','MPC','PSX','VLO','OXY','HAL','PXD','DVN','FANG','HES','MRO','APA','BKR','NOV','HP','WHD'],consumer:['TSLA','HD','MCD','NKE','SBUX','TGT','LOW','TJX','COST','WMT','PG','KO','PEP','PM','MO','EL','CL','GIS','K','CPB'],industrials:['CAT','HON','UPS','BA','GE','RTX','LMT','DE','EMR','ETN','ITW','PH','ROK','AME','FDX','CSX','UNP','NSC','WM','RSG'],utilities:['NEE','DUK','SO','D','AEP','EXC','SRE','XEL','ES','WEC','ED','ETR','PPL','FE','AEE','CMS','NI','LNT','EVRG','PNW'],realestate:['AMT','PLD','CCI','EQIX','SPG','PSA','DLR','O','WELL','AVB','EQR','MAA','UDR','CPT','ESS','NLY','AGNC','MPW','VNO','IRM'],materials:['LIN','APD','ECL','SHW','NEM','FCX','NUE','VMC','MLM','DOW','DD','PPG','ALB','MOS','CF','IFF','FMC','SEE','AMCR','PKG'],crypto:['COIN','MSTR','MARA','RIOT','HUT','CLSK','CIFR','BTBT','SQ','PYPL','HOOD','SOFI','UPST','AFRM','LC']};
+const SECTORS={
+  // ── Core GICS Sectors ──────────────────────────────────────
+  tech:['AAPL','MSFT','NVDA','GOOGL','META','AMZN','TSM','AVGO','ORCL','CRM','AMD','INTC','QCOM','TXN','MU','ADBE','NOW','SNOW','PLTR','NET','IBM','CSCO','ACN','SAP','SHOP','SQ','DELL','HPQ','HPE','LRCX','AMAT','KLAC','MRVL','ON','NXPI','SNPS','CDNS','FTNT','PANW','CRWD','ZS'],
+  semiconductors:['NVDA','AMD','INTC','TSM','AVGO','QCOM','TXN','MU','LRCX','AMAT','KLAC','MRVL','ON','NXPI','SNPS','CDNS','ADI','MCHP','SWKS','QRVO','WOLF','GFS','UMC','ASX','MPWR','SMCI','ARM','ASML'],
+  software:['MSFT','CRM','ORCL','ADBE','NOW','SNOW','PLTR','SHOP','WDAY','TEAM','ZM','DOCU','OKTA','DDOG','MDB','CFLT','PATH','HUBS','VEEV','BILL','PAYC','PCTY','MNDY','ESTC','BRZE','GTLB','ZI','FIVN','NICE','MANH'],
+  finance:['JPM','BAC','GS','MS','WFC','V','MA','AXP','C','BLK','SCHW','USB','PNC','TFC','COF','ICE','CME','SPGI','MCO','BX','KKR','APO','ARES','OWL','CG','BN','RJF','NTRS','STT','BK','HBAN','KEY','CFG','FITB','RF','ZION','ALLY','DFS','SYF','NDAQ'],
+  banks:['JPM','BAC','WFC','C','USB','PNC','TFC','HBAN','KEY','CFG','FITB','RF','ZION','CMA','MTB','FRC','SIVB','WAL','EWBC','FHN','IBKR','SCHW','ALLY','NYCB','OZK','UMBF','BOKF','SNV','VLY','CBSH'],
+  insurance:['BRK.B','PGR','MET','AIG','ALL','TRV','AFL','PRU','AJG','MMC','AON','WTW','CINF','HIG','GL','LNC','UNUM','RGA','EG','RNR','CB','L','RE','KNSL','RYAN'],
+  healthcare:['UNH','JNJ','LLY','ABBV','MRK','TMO','ABT','DHR','BMY','AMGN','PFE','CVS','CI','HUM','MDT','BSX','SYK','ISRG','VRTX','REGN','GILD','BIIB','ZTS','DXCM','IDXX','IQV','A','BDX','BAX','EW','HOLX','MTD','TFX','WST','ALGN','RVTY','CRL','TECH','BIO','PODD'],
+  biotech:['AMGN','GILD','VRTX','REGN','BIIB','MRNA','BNTX','SGEN','ALNY','BMRN','INCY','IONS','SAREPTA','EXEL','PCVX','RCKT','NBIX','HALO','UTHR','MYGN','RARE','ARWR','RGEN','LEGN','FOLD','DAWN','ADPT','BEAM','CRSP','NTLA','EDIT','VERV'],
+  pharma:['LLY','JNJ','ABBV','MRK','PFE','BMY','AZN','NVO','SNY','GSK','NVS','TEVA','ZTS','VTRS','OGN','CTLT','JAZZ','NBIX','BHVN','AXSM','CORT','ITCI','PTCT','ARVN','RVMD'],
+  meddevices:['MDT','BSX','SYK','ISRG','ABT','EW','BDX','BAX','HOLX','DXCM','ALGN','PODD','TFX','SWAV','INSP','SILK','GKOS','NVST','XRAY','IRTC','NVCR','CNMD','ATEC','LIVN','PEN','GMED'],
+  energy:['XOM','CVX','COP','EOG','SLB','MPC','PSX','VLO','OXY','HAL','PXD','DVN','FANG','HES','MRO','APA','BKR','NOV','HP','WHD','CTRA','OVV','AR','RRC','EQT','TRGP','WMB','KMI','OKE','ET','EPD','LNG','DTM','AM'],
+  oilgas:['EOG','PXD','DVN','FANG','COP','OXY','MRO','APA','CTRA','OVV','AR','RRC','EQT','CLR','MTDR','CHRD','SM','CIVI','MGY','PDCE','CPE','ESTE','REI','NOG','VTLE','CRGY','GPOR','SBOW'],
+  oilservices:['SLB','HAL','BKR','NOV','HP','WHD','FTI','CHX','PTEN','LBRT','RES','OII','HLX','XPRO','PUMP','NEX','AESI','WTTR','CLB','AROC'],
+  renewables:['ENPH','SEDG','FSLR','RUN','NOVA','NEE','AES','BEP','CWEN','ORA','ARRY','SHLS','MAXN','CSIQ','JKS','DQ','FLNC','STEM','BE','PLUG','BLDP','CHPT','EVGO','BLNK'],
+  consumer_disc:['TSLA','AMZN','HD','MCD','NKE','SBUX','TGT','LOW','TJX','BKNG','MAR','HLT','ABNB','CMG','YUM','DPZ','POOL','DECK','LULU','RH','WSM','ETSY','W','RVLV','BIRD','CROX','SKX','GRMN','HAS','MAT','F','GM','RIVN','LCID'],
+  consumer_staples:['WMT','COST','PG','KO','PEP','PM','MO','EL','CL','GIS','K','CPB','SJM','HSY','HRL','MKC','CAG','KHC','KR','SYY','ADM','BG','TAP','STZ','SAM','MNST','KDP','CLX','CHD','COTY','USFD'],
+  retail:['WMT','COST','TGT','HD','LOW','TJX','ROST','BBY','DG','DLTR','FIVE','OLLI','BJ','ULTA','WSM','RH','AEO','ANF','GPS','URBN','BURL','KSS','M','JWN','VSCO','SMRT','LULU','DKS','FL','BOOT'],
+  luxury:['LULU','NKE','TPR','RL','CPRI','PVH','HBI','VFC','GOOS','CROX','DECK','SKX','ONON','BIRK','COTY','EL','LVMUY','HESAY','PPRUY'],
+  food_bev:['KO','PEP','MNST','KDP','SAM','STZ','TAP','BF.B','DEO','CELH','FIZZ','COKE','ADM','BG','INGR','MDLZ','HSY','HRL','SJM','GIS','K','CPB','CAG','KHC','LNTH','POST','SMPL','FRPT'],
+  restaurants:['MCD','SBUX','CMG','YUM','DPZ','DRI','WING','CAVA','SHAK','TXRH','EAT','DINE','JACK','CAKE','ARCO','QSR','WEN','PZZA','LOCO','TAST','BROS'],
+  industrials:['CAT','HON','UPS','BA','GE','RTX','LMT','DE','EMR','ETN','ITW','PH','ROK','AME','FDX','CSX','UNP','NSC','WM','RSG','GNRC','IR','DOV','TT','CARR','OTIS','XYL','IEX','ROP','NDSN','GGG','MIDD','SWK','FAST','GWW','LECO','RBC','TTC','AAON','AOS'],
+  defense:['LMT','RTX','NOC','GD','BA','HII','TDG','HEI','AXON','LHX','LDOS','BWXT','KTOS','RKLB','SPR','MRCY','AVAV','CW','MOG.A','PLTR','CACI','SAIC','MANT','PSN','KBR'],
+  transport:['UPS','FDX','CSX','UNP','NSC','JBHT','XPO','ODFL','SAIA','KNX','LSTR','SNDR','WERN','CHRW','EXPD','MATX','GXO','DAL','UAL','LUV','AAL','ALK','JBLU','HA','SKYW','SAVE','RYAAY','UBER','LYFT'],
+  utilities:['NEE','DUK','SO','D','AEP','EXC','SRE','XEL','ES','WEC','ED','ETR','PPL','FE','AEE','CMS','NI','LNT','EVRG','PNW','ATO','OGE','NWE','AVA','BKH','POR','IDA','SWX','WTRG','AWK','AWR','SJW','YORW','CWT','MSEX'],
+  realestate:['AMT','PLD','CCI','EQIX','SPG','PSA','DLR','O','WELL','AVB','EQR','MAA','UDR','CPT','ESS','NLY','AGNC','MPW','VNO','IRM','ARE','BXP','KIM','REG','FRT','HIW','WPC','STAG','CUBE','EXR','LSI','NSA','REXR','TRNO','INVH','SUI','ELS'],
+  materials:['LIN','APD','ECL','SHW','NEM','FCX','NUE','VMC','MLM','DOW','DD','PPG','ALB','MOS','CF','IFF','FMC','SEE','AMCR','PKG','IP','WRK','SON','AVY','RPM','EMN','CE','HUN','OLN','AXTA','TROX'],
+  mining:['NEM','FCX','GOLD','AEM','WPM','FNV','RGLD','KGC','AGI','BTG','HL','CDE','PAAS','SVM','AG','MAG','EGO','BVN','SCCO','TECK','RIO','BHP','VALE','AA','CENX','X','CLF','STLD','NUE','RS'],
+  chemicals:['LIN','APD','SHW','ECL','DD','PPG','ALB','MOS','CF','IFF','FMC','EMN','CE','HUN','OLN','AXTA','RPM','TROX','VNTR','KRO','LYB','DOW','WLK','CC','CBT','FOE','NGVT','BCPC','ASH','GCP'],
+  communication:['GOOGL','META','NFLX','DIS','CMCSA','T','VZ','TMUS','CHTR','PARA','WBD','FOX','FOXA','LBRDA','LBRDK','SIRI','LYV','IMAX','RBLX','EA','TTWO','MTCH','IAC','ZG','PINS','SNAP','SPOT','TTD','MGNI','PUBM'],
+  media:['DIS','CMCSA','NFLX','WBD','PARA','FOX','FOXA','LYV','IMAX','SIRI','ROKU','FUBO','PLTK','BATRA','NYT','NWSA','NWS','GCI','LEE','MCS','CNK','MSGS','EDR','DKNG','PENN'],
+  telecom:['T','VZ','TMUS','CHTR','CMCSA','LBRDA','LBRDK','LUMN','FTR','USM','SHEN','ATUS','LILA','LILAK','GOGO','IRDM','SATS','GILT','VIAV','CIEN','CALIX','CALX','LITE','INFN'],
+  crypto:['COIN','MSTR','MARA','RIOT','HUT','CLSK','CIFR','BTBT','SQ','PYPL','HOOD','SOFI','UPST','AFRM','LC','BITF','HIVE','SATO','WULF','IREN','BTDR','CORZ','ARBK','BKKT','SI'],
+  fintech:['SQ','PYPL','SOFI','AFRM','UPST','LC','HOOD','BILL','FOUR','TOST','PAYO','RPAY','EVTC','GPN','FIS','FISV','ADP','PAYX','WU','RELY','MQ','PSFE','OLO','FLYW','NUVEI','DLO','STNE','PAGS'],
+  cybersecurity:['CRWD','PANW','FTNT','ZS','S','TENB','CYBR','QLYS','RPD','VRNS','SAIL','NET','OKTA','AKAM','FFIV','BB','CHKP','GEN','LDOS','BAH','MNDT','DT'],
+  cloud:['AMZN','MSFT','GOOGL','SNOW','MDB','DDOG','NET','CFLT','ESTC','GTLB','BRZE','TWLO','PATH','FIVN','DOCN','FSLY','CLDR','NEWR','SUMO','DT','SMAR','APPN','PRGS','CDAY','PCTY','PAYC'],
+  ai:['NVDA','MSFT','GOOGL','META','AMD','PLTR','AI','BBAI','SOUN','UPST','PATH','SNOW','MDB','DDOG','CFLT','ESTC','GTLB','BRZE','SMCI','DELL','HPE','ORCL','IBM','CRM','NOW','ADBE','CDNS','SNPS','ARM','MRVL','AVGO'],
+  ev:['TSLA','RIVN','LCID','NIO','LI','XPEV','FSR','GOEV','WKHS','NKLA','PSNY','PTRA','REE','ARVL','LEV','CHPT','EVGO','BLNK','VLTA','QS','MVST','SLDP','AMPX','ENVX','F','GM','HMC','TM','STLA','BWA','LEA','ALV','APTV','MBNKF'],
+  gaming:['EA','TTWO','RBLX','ATVI','NTDOY','SONY','U','PLTK','GLBE','DKNG','PENN','MGM','WYNN','LVS','CZR','BYD','RRR','GENI','RSI','FLUT','GAMB'],
+  cannabis:['TLRY','CGC','ACB','CRON','OGI','SNDL','HEXO','VFF','GRWG','SMG','IIPR','TCNNF','CRLBF','CURLF','TRSSF','GTBIF','CCHWF','AYRWF','VRNOF','CLVR'],
+  spacs_ipo:['IONQ','JOBY','LILM','MNTS','ASTR','RDW','SPIR','ASTS','BKSY','VORB','RKLB','DNA','GENI','VIEW','OUST','LAZR','VLDR','MVIS','STEM','QSI','ORGN'],
+  dividends:['JNJ','PG','KO','PEP','MMM','ABT','ABBV','XOM','CVX','T','VZ','MO','PM','CL','WMT','TGT','EMR','SWK','ITW','GPC','ED','SO','SYY','AFL','ADP','BEN','CAT','DOV','HRL','LOW','MCD','MDT','PPG','SHW','WBA','ADM','AOS','APD','BDX','CLX','CINF','FRT','GD','GWW','KMB','LEG','LIN','NDSN','NUE','O','PNR','ROP','SPGI','SJM','TROW','WST'],
+  china_adr:['BABA','JD','PDD','BIDU','NIO','LI','XPEV','NTES','BILI','TME','FUTU','TIGR','TCOM','ZTO','VIPS','YMM','DIDI','TAL','EDU','LKNCY','WB','IQ','KC','QFIN','FINV','LX','ZH','MNSO','GDS','VNET'],
+  india:['INFY','WIT','HDB','IBN','RDY','SIFY','WNS','MMYT','YTRA','TTM'],
+  latin_america:['MELI','NU','STNE','PAGS','DLO','GLOB','ARCO','BRFS','SBS','ERJ','VTMX','BSMX','SQM','LTM','SUPV','BMA','GGAL','PAM','YPF','EC','COPA','CIB','BSAC','CSAN','VALE'],
+  japan:['TM','SONY','MUFG','SMFG','MFG','NMR','IX','HMC','NTDOY','FUJHY','SFTBY','KMTUY','KYOCY','HTHIY','MNBEY'],
+  etfs_broad:['SPY','QQQ','IWM','DIA','VTI','VOO','IVV','VT','ITOT','SPTM','RSP','MDY','IJR','VB','VO','VV','SCHX','SCHB','SCHA','FNDA','EFA','EEM','VWO','IEMG','VEA','VXUS','IXUS','ACWI'],
+  etfs_sector:['XLF','XLK','XLE','XLV','XLI','XLU','XLP','XLY','XLB','XLRE','XLC','VGT','VFH','VHT','VDE','VIS','VNQ','VCR','VDC','VAW','VOX','SMH','SOXX','IBB','XBI','KRE','KBE','XHB','ITB','IYR','ARKK','ARKG','ARKF','ARKQ','ARKW'],
+  etfs_bond:['AGG','BND','TLT','IEF','SHY','TIP','LQD','HYG','JNK','BNDX','EMB','MUB','VCIT','VCSH','VGIT','VGSH','SCHZ','GOVT','SGOV','BIL','SHV','SCHO','SCHR'],
+  etfs_commodity:['GLD','SLV','IAU','GDX','GDXJ','USO','UNG','DBC','DBA','PDBC','GLDM','PPLT','PALL','COPX','URA','URNM','WEAT','CORN','SOYB','CPER','JJC','LIT','REMX'],
+  etfs_intl:['EFA','EEM','VWO','IEMG','VEA','VXUS','IXUS','ACWI','EWJ','FXI','MCHI','KWEB','INDA','EWZ','EWG','EWU','EWC','EWA','EWY','EWT','EWH','EWS','EWP','EWI','ERUS','TUR','THD','VNM','FM','FLKR']
+};
 const TIMEFRAMES=['3M','6M','YTD','1Y','2Y','3Y','5Y'];
 const MAX_MARKERS=40;
 let rawData=[],chartData={},markers={},notes=[],predictions=[];
@@ -437,8 +540,9 @@ function buildLayout(tf){
   return{
     paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'#0c1526',
     font:{color:'#c0cce0',size:11},margin:{l:52,r:14,t:6,b:36},autosize:true,
+    dragmode:'pan',
     xaxis:{type:'date',gridcolor:'#192840',tickfont:{color:'#6a80a8'},linecolor:'#2a3f6a',rangeslider:{visible:false}},
-    yaxis:{type:scaleMode==='log'?'log':'linear',title:{text:ya.label,font:{size:10,color:'#6a80a8'}},gridcolor:'#192840',tickfont:{color:'#6a80a8'},linecolor:'#2a3f6a',autorange:true},
+    yaxis:{type:scaleMode==='log'?'log':'linear',title:{text:ya.label,font:{size:10,color:'#6a80a8'}},gridcolor:'#192840',tickfont:{color:'#6a80a8'},linecolor:'#2a3f6a',autorange:true,fixedrange:true},
     legend:{orientation:'h',y:-0.16,x:0,font:{size:10},bgcolor:'rgba(0,0,0,0)'},
     shapes:buildShapes(tf),
     annotations:[],  // no on-chart annotations
@@ -504,7 +608,7 @@ function renderChart(tf){
     div.innerHTML='<div style="color:#4a5e80;padding:20px;text-align:center;font-size:12px">No data loaded</div>';
     div._hasPlot=false;renderMarkerLegend(tf);return;
   }
-  const traces=buildTraces(tf),layout=buildLayout(tf),cfg={responsive:true,displayModeBar:false};
+  const traces=buildTraces(tf),layout=buildLayout(tf),cfg={responsive:true,displayModeBar:false,scrollZoom:false};
   if(div._hasPlot){Plotly.react(div,traces,layout,cfg);}
   else{Plotly.newPlot(div,traces,layout,cfg);div._hasPlot=true;attachListeners(div,tf);}
   renderMarkerLegend(tf);
@@ -596,6 +700,31 @@ function applySearchResult(){if(_selectedRow<0||!_searchResults.length)return;co
 // ── Toggles ───────────────────────────────────────────────────
 function toggleMeasure(on){measureMode=on;document.body.classList.toggle('measure-on',on);setStatus(on?'Measure ON — tap/click chart to place markers':'Measure OFF — tap/hover to inspect price');}
 function toggleLabels(on){showLabels=on;TIMEFRAMES.forEach(tf=>renderMarkerLegend(tf));}
+function getChartXRange(tf){
+  const div=document.getElementById(`chart-${tf}`);if(!div||!div._hasPlot)return null;
+  const cd=chartData[tf];if(!cd||!cd.dates.length)return null;
+  const fl=div._fullLayout;if(!fl)return null;
+  return fl.xaxis.range;
+}
+function zoomAll(dir){
+  TIMEFRAMES.forEach(tf=>{zoomChart(tf,dir);});
+  setStatus(`Zoomed ${dir==='in'?'in':'out'} all charts.`);
+}
+function resetAll(){
+  TIMEFRAMES.forEach(tf=>{resetZoom(tf);});
+  setStatus('Reset all charts.');
+}
+function alignAllCharts(){
+  const src=document.getElementById('align-src').value;
+  const xr=getChartXRange(src);
+  if(!xr){setStatus('Load data first.');return;}
+  TIMEFRAMES.forEach(tf=>{
+    if(tf===src)return;
+    const div=document.getElementById(`chart-${tf}`);
+    if(div&&div._hasPlot)Plotly.relayout(div,{'xaxis.range':[xr[0],xr[1]],'yaxis.autorange':true});
+  });
+  setStatus(`Aligned all charts to ${src} view.`);
+}
 function changeScale(val){scaleMode=val;rerenderAll();}
 function toggleEma(n,on){showEma[n]=on;rerenderAll();}
 
