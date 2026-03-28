@@ -50,6 +50,8 @@ tr:hover td { background: #1e2f50; }
 input[type=text],input[type=password],input[type=number],input[type=date],select,textarea {
   background:#12192b;color:#e0e6f0;border:1px solid #2a3f6a;border-radius:4px;padding:3px 6px;font-size:11px;font-family:inherit;min-width:0;
 }
+/* iOS native picker: dark text on light bg so options are readable */
+select option { color:#111; background:#fff; }
 input:focus,select:focus,textarea:focus{outline:none;border-color:#e94560;}
 button{background:#1e2f50;color:#e0e6f0;border:1px solid #2a3f6a;border-radius:4px;padding:3px 8px;cursor:pointer;font-size:11px;white-space:nowrap;font-family:inherit;transition:background .15s;}
 button:hover,button:active{background:#e94560;border-color:#e94560;color:#fff;}
@@ -90,6 +92,12 @@ body.measure-on #measure-chk-lbl{color:#e94560;font-weight:700;}
   #notes-col{display:none;}
   #notes-col.mobile-show{display:flex;position:fixed;inset:0;z-index:500;width:100%!important;padding:12px;background:#1a2540;}
   .chart-wrap{height:230px!important;}
+}
+/* Prevent iOS auto-zoom on focus — inputs must be ≥16px */
+@media(pointer:coarse){
+  input[type=text],input[type=password],input[type=number],input[type=date],select,textarea{font-size:16px;}
+  #toolbar select,#toolbar input{font-size:13px;}
+  .chart-footer select,.chart-footer input{font-size:13px;}
 }
 @media(min-width:769px) and (max-width:1100px){
   #notes-col:not(.hidden){width:260px;}
@@ -409,6 +417,7 @@ async function loadSymbol(){
     const closes=rows.map(r=>r.close),e20=computeEma(closes,20),e50=computeEma(closes,50),e200=computeEma(closes,200);
     rows.forEach((r,i)=>{r.ema20=e20[i];r.ema50=e50[i];r.ema200=e200[i];});
     rawData=rows;currentSym=sym;
+    TIMEFRAMES.forEach(tf=>{const el=document.getElementById(`sym-${tf}`);if(el)el.textContent=sym;});
     TIMEFRAMES.forEach(tf=>{const sl=sliceByTf(rawData,tf);chartData[tf]={dates:sl.map(r=>r.date),closes:sl.map(r=>r.close),highs:sl.map(r=>r.high),lows:sl.map(r=>r.low),ema20:sl.map(r=>r.ema20),ema50:sl.map(r=>r.ema50),ema200:sl.map(r=>r.ema200)};markers[tf]=[];});
     notes=[];renderNotes();TIMEFRAMES.forEach(tf=>renderChart(tf));
     setStatus(`Loaded ${sym} — ${rows.length} days.`);
@@ -741,6 +750,7 @@ function buildPanels(){
     wrap.innerHTML=`
       <div class="chart-title">
         <span>${tf}</span>
+        <span id="sym-${tf}" style="color:#4e9af1;font-size:11px;font-weight:600;letter-spacing:.03em"></span>
         <button class="zoom-btn" onclick="zoomChart('${tf}','in')">+</button>
         <button class="zoom-btn" onclick="zoomChart('${tf}','out')">−</button>
         <button class="zoom-btn" onclick="resetZoom('${tf}')" style="font-size:10px;padding:2px 5px">↺</button>
