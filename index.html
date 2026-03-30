@@ -419,6 +419,12 @@ async function loadSymbol(){
     rows.forEach((r,i)=>{r.ema20=e20[i];r.ema50=e50[i];r.ema200=e200[i];});
     rawData=rows;currentSym=sym;
     TIMEFRAMES.forEach(tf=>{const el=document.getElementById(`sym-${tf}`);if(el)el.textContent=sym;});
+    const lastPrice=rows[rows.length-1].close;
+    const prevPrice=rows.length>1?rows[rows.length-2].close:lastPrice;
+    const dayChg=((lastPrice-prevPrice)/prevPrice*100);
+    const priceColor=dayChg>=0?'#2da44e':'#e94560';
+    const arrow=dayChg>=0?'▲':'▼';
+    TIMEFRAMES.forEach(tf=>{const el=document.getElementById(`price-${tf}`);if(el){el.innerHTML=`<span style="color:#c8d8f0">$${lastPrice.toFixed(2)}</span> <span style="color:${priceColor};font-size:10px">${arrow}${Math.abs(dayChg).toFixed(2)}%</span>`;}});
     TIMEFRAMES.forEach(tf=>{const sl=sliceByTf(rawData,tf);chartData[tf]={dates:sl.map(r=>r.date),closes:sl.map(r=>r.close),highs:sl.map(r=>r.high),lows:sl.map(r=>r.low),ema20:sl.map(r=>r.ema20),ema50:sl.map(r=>r.ema50),ema200:sl.map(r=>r.ema200)};markers[tf]=[];});
     notes=[];renderNotes();TIMEFRAMES.forEach(tf=>renderChart(tf));
     setStatus(`Loaded ${sym} — ${rows.length} days.`);
@@ -752,6 +758,7 @@ function buildPanels(){
       <div class="chart-title">
         <span>${tf}</span>
         <span id="sym-${tf}" style="color:#4e9af1;font-size:11px;font-weight:600;letter-spacing:.03em"></span>
+        <span id="price-${tf}" style="color:#8ca0c8;font-size:11px;font-weight:400"></span>
         <button class="zoom-btn" onclick="zoomChart('${tf}','in')">+</button>
         <button class="zoom-btn" onclick="zoomChart('${tf}','out')">−</button>
         <button class="zoom-btn" onclick="resetZoom('${tf}')" style="font-size:10px;padding:2px 5px">↺</button>
