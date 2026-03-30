@@ -118,7 +118,7 @@ body.measure-on #measure-chk-lbl{color:#e94560;font-weight:700;}
 <body>
 
 <div id="toolbar">
-  <span class="logo">📈 StockMarker</span>
+  <span class="logo"><span id="db-dot-logo" class="status-dot dot-idle" style="width:8px;height:8px;display:inline-block;vertical-align:middle;margin-right:4px"></span>StockMarker</span>
   <div class="tb-sep"></div>
   <span class="tb-label">Sector</span>
   <select id="sector-sel" onchange="onSectorChange()" style="min-width:130px">
@@ -179,10 +179,8 @@ body.measure-on #measure-chk-lbl{color:#e94560;font-weight:700;}
   <span class="tb-label">Symbol</span>
   <input type="text" id="symbol-input" placeholder="AAPL" style="min-width:68px;width:80px" value="AAPL" onkeydown="if(event.key==='Enter') loadSymbol()">
   <button class="accent" onclick="loadSymbol()">Load</button>
-  <button onclick="openSearch()">Search…</button>
-  <div class="tb-sep"></div>
   <input type="text" id="db-endpoint" style="display:none" value="https://stock-api-production-1fbd.up.railway.app" onchange="testEndpoint()">
-  <span id="db-badge" class="db-badge db-disconnected">—</span>
+  <span id="db-badge" style="display:none">—</span>
   <div class="tb-sep"></div>
   <label id="measure-chk-lbl"><input type="checkbox" id="measure-chk" onchange="toggleMeasure(this.checked)"> Measure</label>
   <label><input type="checkbox" id="labels-chk" checked onchange="toggleLabels(this.checked)"> Labels</label>
@@ -196,10 +194,6 @@ body.measure-on #measure-chk-lbl{color:#e94560;font-weight:700;}
     <option value="1Y" selected>1Y</option><option value="2Y">2Y</option><option value="3Y">3Y</option><option value="5Y">5Y</option>
   </select>
   <button class="sm accent" onclick="alignAllCharts()">Align</button>
-  <div class="tb-sep"></div>
-  <select id="scale-sel" onchange="changeScale(this.value)" style="min-width:75px">
-    <option value="price">Price</option><option value="log">Log</option><option value="pct">% Change</option>
-  </select>
   <div class="tb-sep"></div>
   <label><input type="checkbox" id="ema20-chk" checked onchange="toggleEma(20,this.checked)"> EMA20</label>
   <label><input type="checkbox" id="ema50-chk" checked onchange="toggleEma(50,this.checked)"> EMA50</label>
@@ -376,10 +370,11 @@ function onTickerSelect(){
 
 // ── DB ────────────────────────────────────────────────────────
 function setDbStatus(state,msg){
-  const dot=document.getElementById('db-dot'),badge=document.getElementById('db-badge');
-  dot.className='status-dot '+(state==='ok'?'dot-ok':state==='busy'?'dot-busy':'dot-err');
-  badge.className='db-badge '+(state==='ok'?'db-connected':'db-disconnected');
-  badge.textContent=state==='ok'?'connected':state==='busy'?'…':'—';
+  const dot=document.getElementById('db-dot'),badge=document.getElementById('db-badge'),logoDot=document.getElementById('db-dot-logo');
+  const cls='status-dot '+(state==='ok'?'dot-ok':state==='busy'?'dot-busy':'dot-err');
+  if(dot)dot.className=cls;
+  if(logoDot)logoDot.className='status-dot '+(state==='ok'?'dot-ok':state==='busy'?'dot-busy':'dot-err');
+  if(badge){badge.className='db-badge '+(state==='ok'?'db-connected':'db-disconnected');badge.textContent=state==='ok'?'connected':state==='busy'?'…':'—';}
   if(msg)setStatus(msg);
 }
 function testEndpoint(){dbEndpoint=document.getElementById('db-endpoint').value.trim();setDbStatus(dbEndpoint?'ok':'err');}
